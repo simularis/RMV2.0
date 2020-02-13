@@ -268,28 +268,28 @@ savings_results_plot <-  function(savings_res_tab){
        plotly::layout(showlegend = F)
   return(p)
 }
-##  -----  Deprecated  -----
-## exclude the uncertainty calculation
-# savings_results_plot <-  function(savings_res_tab){
-#   savings_res_tab <- dplyr::arrange(savings_res_tab, FS)
-#   savings_res_tab$Name <- factor(savings_res_tab$Name,
-#                                  levels =unique(savings_res_tab$Name))
-#   savings_res_tab$savings_err <- savings_res_tab$FS*savings_res_tab$FSU/100
-#   savings_res_tab <- as.data.frame(savings_res_tab)
-#   p <- plotly::plot_ly(savings_res_tab, x = ~Name, y = ~FS,
-#                        type = 'bar',
-#                        marker = list(color= "#06AED5",
-#                                      line = list(color = "#086788",
-#                                      width = 1.5)),
-#                        error_y = list(type = "data",
-#                        array = savings_res_tab$savings_err, color = '#DD1C1A')
-#                        ) %>%
-#        plotly::layout(xaxis = list(showticklabels = F)) %>%
-#        plotly::layout(autosize = T) %>%
-#        plotly::config(displayModeBar = F) %>%
-#        plotly::layout(showlegend = F)
-#   return(p)
-# }
+#  -----  Deprecated  -----
+# exclude the uncertainty calculation
+savings_results_plot <-  function(savings_res_tab){
+  savings_res_tab <- dplyr::arrange(savings_res_tab, FS)
+  savings_res_tab$Name <- factor(savings_res_tab$Name,
+                                 levels =unique(savings_res_tab$Name))
+  savings_res_tab$savings_err <- savings_res_tab$FS*savings_res_tab$FSU/100
+  savings_res_tab <- as.data.frame(savings_res_tab)
+  p <- plotly::plot_ly(savings_res_tab, x = ~Name, y = ~FS,
+                       type = 'bar',
+                       marker = list(color= "#06AED5",
+                                     line = list(color = "#086788",
+                                     width = 1.5)),
+                       error_y = list(type = "data",
+                       array = savings_res_tab$savings_err, color = '#DD1C1A')
+                       ) %>%
+       plotly::layout(xaxis = list(showticklabels = F)) %>%
+       plotly::layout(autosize = T) %>%
+       plotly::config(displayModeBar = F) %>%
+       plotly::layout(showlegend = F)
+  return(p)
+}
 
 
 #' Screening pie plot

@@ -26,7 +26,8 @@ HOME = fs::path_home()
 cat("HOME = \n")
 print(HOME)
 
-volumes = c( "HOME"=HOME, getVolumes()())
+
+volumes = c("RMV2.0 Workshop"=fs::path("C:/RMV2.0 Workshop"), "HOME"=HOME, getVolumes()())
 
 # shinyFiles package has some incompatibilities with R v3.4.1.
 # A fix proposed in :

@@ -457,25 +457,25 @@ shinyServer(function(input, output, session) {
  #   return(p)
  # })
 
- ##  -----  Deprecated  -----
- ## exclude the uncertainty calculation
- #
- # ###########################  Uncertainty Estimation ###########################
- #
- # # Calculate the uncertainties estimation tab
- # observeEvent(input$fsu_est_go_sc,{
- #   model_obj_list <- screen_out$model_obj_list
- #   model_obj_list <- model_obj_list$models_list
- #   screen_out$fsu_est_tab <- fsu_estimation_sc(screen_out, input$d_post_sc,
- #                                               input$Frac_Sav_sc)
- # })
- #
- # # Render uncertianties estimation tab
- # output$fsu_est_tab_sc <- renderDataTable({
- #   fsu_tab <- screen_out$fsu_est_tab
- #   return(fsu_tab)
- #   }, options = list(pageLength = 5))
- #
+ #  -----  Deprecated  -----
+ # exclude the uncertainty calculation
+
+ ###########################  Uncertainty Estimation ###########################
+
+ # Calculate the uncertainties estimation tab
+ observeEvent(input$fsu_est_go_sc,{
+   model_obj_list <- screen_out$model_obj_list
+   model_obj_list <- model_obj_list$models_list
+   screen_out$fsu_est_tab <- fsu_estimation_sc(screen_out, input$d_post_sc,
+                                               input$Frac_Sav_sc)
+ })
+
+ # Render uncertianties estimation tab
+ output$fsu_est_tab_sc <- renderDataTable({
+   fsu_tab <- screen_out$fsu_est_tab
+   return(fsu_tab)
+   }, options = list(pageLength = 5))
+
 
  ############################  Results summary ################################
 
@@ -1155,15 +1155,15 @@ shinyServer(function(input, output, session) {
 
   ###########################  Savings Analysis ###############################
 
-  ##  -----  Deprecated  -----
-  ## exclude the uncertainty calculation
-  # observeEvent(input$sav_est_go,{
-  #  sav_out$sav_est_tab <- savings_summary(sav_out, input$inCL)
-  #  sav_out$CL <- input$inCL
-  # })
+  #  -----  Deprecated  -----
+  # exclude the uncertainty calculation
   observeEvent(input$sav_est_go,{
-   sav_out$sav_est_tab <- savings_summary(sav_out)
+   sav_out$sav_est_tab <- savings_summary(sav_out, input$inCL)
+   sav_out$CL <- input$inCL
   })
+  # observeEvent(input$sav_est_go,{
+  #  sav_out$sav_est_tab <- savings_summary(sav_out)
+  # })
 
   output$sav_est_tab <- renderDataTable({
     sav_tab <- sav_out$sav_est_tab
@@ -1532,32 +1532,32 @@ shinyServer(function(input, output, session) {
 
 
 
-      ##  -----  Deprecated  -----
-      ## exclude the uncertainty calculation
-      # output$SavRangeBoxSav <- renderValueBox({
-      #   valueBox(
-      #     paste0("Savings Range"),
-      #     h4(strong(paste0(sav_tab$Savings_Range[idx_i], " (@ ", sav_out$CL, "%", " CL)"))),
-      #     icon = icon("leaf"),
-      #     color = "teal"
-      #   )
-      # })
-      # output$FsRangeBoxSav <- renderValueBox({
-      #   valueBox(
-      #     paste0("FS Range (in %)"),
-      #     h4(strong(paste0(sav_tab$FS_Range[idx_i], " (@ ", sav_out$CL, "%", " CL)"))),
-      #     icon = icon("leaf"),
-      #     color = "teal"
-      #   )
-      # })
-      # output$FsuBoxSav <- renderValueBox({
-      #   valueBox(
-      #     paste0("FSU"),
-      #     h4(strong(paste0(sav_tab$FSU[idx_i], "%", " (@ ", sav_out$CL, "%", " CL)"))),
-      #     icon = icon("bar-chart-o"),
-      #     color = "aqua"
-      #   )
-      # })
+      #  -----  Deprecated  -----
+      # exclude the uncertainty calculation
+      output$SavRangeBoxSav <- renderValueBox({
+        valueBox(
+          paste0("Savings Range"),
+          h4(strong(paste0(sav_tab$Savings_Range[idx_i], " (@ ", sav_out$CL, "%", " CL)"))),
+          icon = icon("leaf"),
+          color = "teal"
+        )
+      })
+      output$FsRangeBoxSav <- renderValueBox({
+        valueBox(
+          paste0("FS Range (in %)"),
+          h4(strong(paste0(sav_tab$FS_Range[idx_i], " (@ ", sav_out$CL, "%", " CL)"))),
+          icon = icon("leaf"),
+          color = "teal"
+        )
+      })
+      output$FsuBoxSav <- renderValueBox({
+        valueBox(
+          paste0("FSU"),
+          h4(strong(paste0(sav_tab$FSU[idx_i], "%", " (@ ", sav_out$CL, "%", " CL)"))),
+          icon = icon("bar-chart-o"),
+          color = "aqua"
+        )
+      })
     }
     else if (input$type_summ == 1 & input$level_summ == 1){
       port_sav_tab <- portfolio_savings(sav_out)
@@ -1581,32 +1581,32 @@ shinyServer(function(input, output, session) {
           color = "teal"
         )
       })
-      ##  -----  Deprecated  -----
-      ## exclude the uncertainty calculation
-      # output$PortFsuBoxSav <- renderValueBox({
-      #   valueBox(
-      #     paste0("FSU"),
-      #     h4(strong(paste0(port_sav_tab$FSU_portfolio, "%", " (@ ", sav_out$CL, "%", " CL)"))),
-      #     icon = icon("bar-chart-o"),
-      #     color = "aqua"
-      #   )
-      # })
-      # output$PortSavRangeBoxSav <- renderValueBox({
-      #   valueBox(
-      #     paste0("Savings Range"),
-      #     h4(strong(paste0(port_sav_tab$Savings_Range, " (@ ", sav_out$CL, "%", " CL)"))),
-      #     icon = icon("leaf"),
-      #     color = "teal"
-      #   )
-      # })
-      # output$PortFsRangeBoxSav <- renderValueBox({
-      #   valueBox(
-      #     paste0("FS Range (in %)"),
-      #     h4(strong(paste0(port_sav_tab$FS_Range, " (@ ", sav_out$CL, "%", " CL)"))),
-      #     icon = icon("leaf"),
-      #     color = "teal"
-      #   )
-      # })
+      #  -----  Deprecated  -----
+      # exclude the uncertainty calculation
+      output$PortFsuBoxSav <- renderValueBox({
+        valueBox(
+          paste0("FSU"),
+          h4(strong(paste0(port_sav_tab$FSU_portfolio, "%", " (@ ", sav_out$CL, "%", " CL)"))),
+          icon = icon("bar-chart-o"),
+          color = "aqua"
+        )
+      })
+      output$PortSavRangeBoxSav <- renderValueBox({
+        valueBox(
+          paste0("Savings Range"),
+          h4(strong(paste0(port_sav_tab$Savings_Range, " (@ ", sav_out$CL, "%", " CL)"))),
+          icon = icon("leaf"),
+          color = "teal"
+        )
+      })
+      output$PortFsRangeBoxSav <- renderValueBox({
+        valueBox(
+          paste0("FS Range (in %)"),
+          h4(strong(paste0(port_sav_tab$FS_Range, " (@ ", sav_out$CL, "%", " CL)"))),
+          icon = icon("leaf"),
+          color = "teal"
+        )
+      })
     }
     else if (input$type_summ == 1 & input$level_summ == 2){
       port_sav_tab <- portfolio_savings(sav_out, screened =T)
@@ -1630,32 +1630,32 @@ shinyServer(function(input, output, session) {
           color = "teal"
         )
       })
-      ##  -----  Deprecated  -----
-      ## exclude the uncertainty calculation
-      # output$PortFsuBoxSav_2 <- renderValueBox({
-      #   valueBox(
-      #     paste0("FSU"),
-      #     h4(strong(paste0(port_sav_tab$FSU_portfolio, "%", " (@ ", sav_out$CL, "%", " CL)"))),
-      #     icon = icon("bar-chart-o"),
-      #     color = "aqua"
-      #   )
-      # })
-      # output$PortSavRangeBoxSav_2 <- renderValueBox({
-      #   valueBox(
-      #     paste0("Savings Range"),
-      #     h4(strong(paste0(port_sav_tab$Savings_Range, " (@ ", sav_out$CL, "%", " CL)"))),
-      #     icon = icon("leaf"),
-      #     color = "teal"
-      #   )
-      # })
-      # output$PortFsRangeBoxSav_2 <- renderValueBox({
-      #   valueBox(
-      #     paste0("FS Range (in %)"),
-      #     h4(strong(paste0(port_sav_tab$FS_Range, " (@ ", sav_out$CL, "%", " CL)"))),
-      #     icon = icon("leaf"),
-      #     color = "teal"
-      #   )
-      # })
+      #  -----  Deprecated  -----
+      # exclude the uncertainty calculation
+      output$PortFsuBoxSav_2 <- renderValueBox({
+        valueBox(
+          paste0("FSU"),
+          h4(strong(paste0(port_sav_tab$FSU_portfolio, "%", " (@ ", sav_out$CL, "%", " CL)"))),
+          icon = icon("bar-chart-o"),
+          color = "aqua"
+        )
+      })
+      output$PortSavRangeBoxSav_2 <- renderValueBox({
+        valueBox(
+          paste0("Savings Range"),
+          h4(strong(paste0(port_sav_tab$Savings_Range, " (@ ", sav_out$CL, "%", " CL)"))),
+          icon = icon("leaf"),
+          color = "teal"
+        )
+      })
+      output$PortFsRangeBoxSav_2 <- renderValueBox({
+        valueBox(
+          paste0("FS Range (in %)"),
+          h4(strong(paste0(port_sav_tab$FS_Range, " (@ ", sav_out$CL, "%", " CL)"))),
+          icon = icon("leaf"),
+          color = "teal"
+        )
+      })
     }
 
   })
@@ -1723,9 +1723,9 @@ shinyServer(function(input, output, session) {
      sav_out$model_obj_list <- load_res$model_obj_list
      sav_out$files_names_mod <- load_res$files_names_mod
      sav_out$sav_est_tab <- load_res$sav_est_tab
-     ##  -----  Deprecated  -----
-     ## exclude the uncertainty calculation
-     #sav_out$CL <- load_res$CL
+     #  -----  Deprecated  -----
+     # exclude the uncertainty calculation
+     sav_out$CL <- load_res$CL
      sav_out$screen_summary_list <- load_res$screen_summary_list
      sav_out$files_names_nre <- load_res$files_names_nre
      sav_out$nre_obj_list <- load_res$nre_obj_list

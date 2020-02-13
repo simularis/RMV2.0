@@ -50,11 +50,11 @@ dashboardPage(skin = "red",
                    menuSubItem("Baseline Modeling Results",
                                icon = icon("pie-chart"),
                                tabName = "resBaseline_sc"),
-                   ##  -----  Deprecated  -----
-                   ## exclude the uncertainty calculation
-                   # menuSubItem("Uncertainty Estimation",
-                   #             icon = icon("stats", lib = "glyphicon"),
-                   #             tabName = "uncertEstimation_sc"),
+                   #  -----  Deprecated  -----
+                   # exclude the uncertainty calculation
+                   menuSubItem("Uncertainty Estimation",
+                               icon = icon("stats", lib = "glyphicon"),
+                               tabName = "uncertEstimation_sc"),
                    menuSubItem("Summary",
                                icon = icon("dashboard"),
                                tabName = "summary_sc"),
@@ -92,11 +92,11 @@ dashboardPage(skin = "red",
                    menuSubItem("Baseline Modeling Results",
                                icon = icon("pie-chart"),
                                tabName = "resBaseline_sc"),
-                  ##  -----  Deprecated  -----
-                  ## exclude the uncertainty calculation
-                  # menuSubItem("Uncertainty Estimation",
-                  #             icon = icon("stats", lib = "glyphicon"),
-                  #             tabName = "uncertEstimation_sc"),
+                  #  -----  Deprecated  -----
+                  # exclude the uncertainty calculation
+                  menuSubItem("Uncertainty Estimation",
+                              icon = icon("stats", lib = "glyphicon"),
+                              tabName = "uncertEstimation_sc"),
                   menuSubItem("Summary",
                               icon = icon("dashboard"),
                               tabName = "summary_sc")
@@ -379,7 +379,7 @@ dashboardPage(skin = "red",
               )#end of column
             ),# end of conditionalPanel
             conditionalPanel(condition = "input.next_init_1 && input.type_init == 2 && input.new_init == 1",
-              column(width = 4,
+              column(width = 6,
                 box(title = "Savings Analysis Mode",
                     width = 12,
                     solidHeader = T,
@@ -454,12 +454,12 @@ dashboardPage(skin = "red",
                  )#end of cp
                 )#end of box
               ),# end of column
-              column(width = 4,
+              column(width = 6,
                      infoBoxOutput("intEndBox_sav",width = 12)
               )#end of column
             ),# end of conditionalPanel
             conditionalPanel(condition = "input.next_init_1 && input.type_init == 2 && input.new_init == 2",
-              column(width = 4,
+              column(width = 6,
                 box(title = "Savings Analysis Mode",
                     width = 12,
                     solidHeader = T,
@@ -491,7 +491,7 @@ dashboardPage(skin = "red",
                    )#end of cp
                 )#end of box
               ),# end of column
-              column(width = 4,
+              column(width = 6,
                      infoBoxOutput("intEndBox_sav_lo",width = 12)
               )#end of column
             )# end of conditionalPanel
@@ -771,48 +771,48 @@ dashboardPage(skin = "red",
           )#end of conditionalPanel
         )#end of fluidPage
       ),#end of tabItem
-##  -----  Deprecated  -----
-## exclude the uncertainty calculation
-      # tabItem(tabName = "uncertEstimation_sc",
-      #   fluidPage(
-      #     conditionalPanel(condition = "input.Train_go_sc || input.next_init_sc_lo",
-      #       fluidRow(
-      #         column(width = 8,
-      #           box(title = "Fractional savings uncertainty for a given fractional savings",
-      #               width = 12,
-      #               solidHeader = T,
-      #               status = "info",
-      #              box(title = " ",
-      #                  width =3,
-      #                  solidHeader = F,
-      #                  status = "info",
-      #                  numericInput("Frac_Sav_sc",
-      #                               "Provide the Expected Fractional Savings (in %)",
-      #                               5, min = 0, max = 100, step =1,
-      #                               width = NULL),
-      #                  br(),
-      #                  numericInput("d_post_sc",
-      #                               "Provide The Expected Length Of The Post Period (in days)",
-      #                               365, min = 0, max = 3650, step =1,
-      #                               width = NULL),
-      #                  actionButton("fsu_est_go_sc",
-      #                               label = "Estimate",
-      #                               width ="100%")
-      #              ),# end of box
-      #              conditionalPanel(condition = "input.fsu_est_go_sc",
-      #                box(title = "",
-      #                    width = 9,
-      #                    solidHeader = F,
-      #                    status = "info",
-      #                    dataTableOutput("fsu_est_tab_sc")
-      #                )# end of box
-      #              ) #end of conditionalPanel
-      #           )# end of box
-      #         )#end of column
-      #       )#end of fluidRow
-      #     )#end of conditionalPanel
-      #   )#end of fluidPage
-      # ),#end of tabItem
+#  -----  Deprecated  -----
+# exclude the uncertainty calculation
+tabItem(tabName = "uncertEstimation_sc",
+  fluidPage(
+    conditionalPanel(condition = "input.Train_go_sc || input.next_init_sc_lo",
+      fluidRow(
+        column(width = 8,
+          box(title = "Fractional savings uncertainty for a given fractional savings",
+              width = 12,
+              solidHeader = T,
+              status = "info",
+             box(title = " ",
+                 width =3,
+                 solidHeader = F,
+                 status = "info",
+                 numericInput("Frac_Sav_sc",
+                              "Provide the Expected Fractional Savings (in %)",
+                              5, min = 0, max = 100, step =1,
+                              width = NULL),
+                 br(),
+                 numericInput("d_post_sc",
+                              "Provide The Expected Length Of The Post Period (in days)",
+                              365, min = 0, max = 3650, step =1,
+                              width = NULL),
+                 actionButton("fsu_est_go_sc",
+                              label = "Estimate",
+                              width ="100%")
+             ),# end of box
+             conditionalPanel(condition = "input.fsu_est_go_sc",
+               box(title = "",
+                   width = 9,
+                   solidHeader = F,
+                   status = "info",
+                   dataTableOutput("fsu_est_tab_sc")
+               )# end of box
+             ) #end of conditionalPanel
+          )# end of box
+        )#end of column
+      )#end of fluidRow
+    )#end of conditionalPanel
+  )#end of fluidPage
+),#end of tabItem
 
       tabItem(tabName = "summary_sc",
         fluidPage(
@@ -1190,13 +1190,13 @@ dashboardPage(skin = "red",
                               period."),
                        br(),
                        hr(),
-                       ##  -----  Deprecated  -----
-                       ## exclude the uncertainty calculation
-                       # numericInput("inCL",
-                       #              "The Confidence Level at which the Savings Uncertainty will be Estimated (in %)",
-                       #              68, min = 0, max = 100, step =1,
-                       #              width = NULL),
-                       # br(),
+                       #  -----  Deprecated  -----
+                       # exclude the uncertainty calculation
+                       numericInput("inCL",
+                                    "The Confidence Level at which the Savings Uncertainty will be Estimated (in %)",
+                                    68, min = 0, max = 100, step =1,
+                                    width = NULL),
+                       br(),
                        actionButton("sav_est_go",
                                     label = "Estimate Savings",
                                     width ="100%"),
@@ -1593,9 +1593,9 @@ dashboardPage(skin = "red",
                      valueBoxOutput("R2BoxSav",width = 4),
                      valueBoxOutput("CVRMSEBoxSav",width = 4),
                      valueBoxOutput("NMBEBoxSav",width = 4),
-                     ##  -----  Deprecated  -----
-                     ## exclude the uncertainty calculation
-                     # valueBoxOutput("FsuBoxSav",width = 3),
+                     #  -----  Deprecated  -----
+                     # exclude the uncertainty calculation
+                     valueBoxOutput("FsuBoxSav",width = 3),
                      box("Pre-Installation",
                          width =6,
                          solidHeader = F,
@@ -1612,10 +1612,10 @@ dashboardPage(skin = "red",
                        valueBoxOutput("SavingsBoxSav",width = 6),
                        valueBoxOutput("FsBoxSav",width = 6)
                      )
-                     ##  -----  Deprecated  -----
-                     ## exclude the uncertainty calculation
-                     # valueBoxOutput("SavRangeBoxSav",width = 6),
-                     # valueBoxOutput("FsRangeBoxSav",width = 6)
+                     #  -----  Deprecated  -----
+                     # exclude the uncertainty calculation
+                     ,valueBoxOutput("SavRangeBoxSav",width = 6),
+                     valueBoxOutput("FsRangeBoxSav",width = 6)
               ),#end column
               column(width = 3),
               column(width = 6,
@@ -1629,11 +1629,11 @@ dashboardPage(skin = "red",
                                           input.level_summ == 1 &&
                                           input.summary_go_sav",
               column(width = 12,
-                     ##  -----  Deprecated  -----
-                     ## exclude the uncertainty calculation
-                     # column(width = 4),
-                     # valueBoxOutput("PortFsuBoxSav",width = 4),
-                     # column(width = 4),
+                     #  -----  Deprecated  -----
+                     # exclude the uncertainty calculation
+                     column(width = 4),
+                     valueBoxOutput("PortFsuBoxSav",width = 4),
+                     column(width = 4),
                      box("Savings Results",
                          width =12,
                          solidHeader = F,
@@ -1644,21 +1644,21 @@ dashboardPage(skin = "red",
                        valueBoxOutput("PortSavingsBoxSav",width = 6),
                        valueBoxOutput("PortFsBoxSav",width = 6)
                      )
-                     ##  -----  Deprecated  -----
-                     ## exclude the uncertainty calculation
-                     # valueBoxOutput("PortSavRangeBoxSav",width = 6),
-                     # valueBoxOutput("PortFsRangeBoxSav",width = 6)
+                     #  -----  Deprecated  -----
+                     # exclude the uncertainty calculation
+                     ,valueBoxOutput("PortSavRangeBoxSav",width = 6),
+                     valueBoxOutput("PortFsRangeBoxSav",width = 6)
               )#end column
             ),#end of conditionalPanel
             conditionalPanel(condition = "input.type_summ == 1 &&
                                           input.level_summ == 2 &&
                                           input.summary_go_sav",
               column(width = 12,
-                     ##  -----  Deprecated  -----
-                     ## exclude the uncertainty calculation
-                     # column(width = 4),
-                     # valueBoxOutput("PortFsuBoxSav_2",width = 4),
-                     # column(width = 4),
+                     #  -----  Deprecated  -----
+                     # exclude the uncertainty calculation
+                     column(width = 4),
+                     valueBoxOutput("PortFsuBoxSav_2",width = 4),
+                     column(width = 4),
                      box("Savings Results",
                          width =12,
                          solidHeader = F,
@@ -1669,10 +1669,10 @@ dashboardPage(skin = "red",
                        valueBoxOutput("PortSavingsBoxSav_2",width = 6),
                        valueBoxOutput("PortFsBoxSav_2",width = 6)
                      )
-                     ##  -----  Deprecated  -----
-                     ## exclude the uncertainty calculation
-                     # valueBoxOutput("PortSavRangeBoxSav_2",width = 6),
-                     # valueBoxOutput("PortFsRangeBoxSav_2",width = 6)
+                     #  -----  Deprecated  -----
+                     # exclude the uncertainty calculation
+                     ,valueBoxOutput("PortSavRangeBoxSav_2",width = 6),
+                     valueBoxOutput("PortFsRangeBoxSav_2",width = 6)
               )#end column
             )#end of conditionalPanel
           )#end of conditionalPanel
