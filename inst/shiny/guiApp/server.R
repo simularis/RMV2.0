@@ -70,7 +70,7 @@ shinyServer(function(input, output, session) {
   p_name_sc <- renderText({input$p_name_sc})
   screen_out$p_name_sc <- p_name_sc
 
-  observe({change_box("save_dir_sc_box", !(is.null(input$save_dir_sc)))})
+  observe({change_box("save_dir_sc_box", !(is.integer(input$save_dir_sc)))})
 
   # set the directory where the project will be stored
   shinyDirChoose(input,
@@ -79,46 +79,71 @@ shinyServer(function(input, output, session) {
                  filetypes = c('', 'csv'))
   save_dir_sc <- reactive(input$save_dir_sc)
   path_save_dir_sc <- reactive({
-    home <- normalizePath("~")
-    file.path(volumes[save_dir_sc()$root], paste(unlist(save_dir_sc()$path[-1]),
-              collapse = .Platform$file.sep))
+    # 2020-02-12 NF
+    cat("input$save_dir_sc value:\n")
+    print(input$save_dir_sc)
+
+    if (is.integer(input$save_dir_sc)) {
+      cat("No save_dir_sc path has been set (shinyDirChoose)!\n\n")
+    } else {
+      cat("The save_dir_sc path has been set (shinyDirChoose)!\n\n")
+    }
+
+    parseDirPath(volumes,input$save_dir_sc)
+
+    # home <- normalizePath("~")
+    # file.path(volumes[save_dir_sc()$root], paste(unlist(save_dir_sc()$path[-1]),
+    #           collapse = .Platform$file.sep))
   })
   output$save_dir_sc_out <- renderText({basename(path_save_dir_sc())})
 
   ########################  Set Pre-instatllation Data ###########################
 
-  observe({change_box("pre_dir_sc_box", !(is.null(input$pre_dir_sc)))})
+  observe({change_box("pre_dir_sc_box", !(is.integer(input$pre_dir_sc)))})
+
+  shinyDirChoose(input,
+                 'pre_dir_sc',
+                 roots = volumes,
+                 filetypes = c('csv'))
 
   observe({
     if (input$next_init_1!=0 & input$type_init == 1 & input$new_init == 1){
       # set the directory from where the pre data will be read
-      shinyDirChoose(input,
-                     'pre_dir_sc',
-                     roots = volumes,
-                     filetypes = c('csv'))
-      # define home directory
-      home <- normalizePath("~")
-      # get the pre data directory paths
-      screen_out$pre_dir_sc <- file.path(volumes[input$pre_dir_sc$root],
-                                         paste(unlist(input$pre_dir_sc$path[-1]),
-                                         collapse = .Platform$file.sep))
-      # get the pre data files paths
-      screen_out$files_path_sc <- list.files(screen_out$pre_dir_sc,
+
+      # 2020-02-12 NF
+      cat("input$pre_dir_sc value:\n")
+      print(input$pre_dir_sc)
+
+      if (is.integer(input$pre_dir_sc)) {
+        cat("No pre_dir_sc path has been set (shinyDirChoose)!\n\n")
+      } else {
+        cat("The pre_dir_sc path has been set (shinyDirChoose)!\n\n")
+
+        # define home directory
+        home <- normalizePath("~")
+        # get the pre data directory paths
+        screen_out$pre_dir_sc <- parseDirPath(volumes, input$pre_dir_sc)
+        # screen_out$pre_dir_sc <- file.path(volumes[input$pre_dir_sc$root],
+        #                                    paste(unlist(input$pre_dir_sc$path[-1]),
+        #                                          collapse = .Platform$file.sep))
+        # get the pre data files paths
+        screen_out$files_path_sc <- list.files(screen_out$pre_dir_sc,
+                                               "*\\.csv",
+                                               full.names = T,
+                                               include.dirs =F)
+        # get the pre data files names
+        screen_out$files_names <- list.files(screen_out$pre_dir_sc,
                                              "*\\.csv",
-                                             full.names = T,
+                                             full.names = F,
                                              include.dirs =F)
-      # get the pre data files names
-      screen_out$files_names <- list.files(screen_out$pre_dir_sc,
-                                              "*\\.csv",
-                                              full.names = F,
-                                              include.dirs =F)
-      #Render the pre path
-      output$pre_dir_sc_out <- renderText({basename(screen_out$pre_dir_sc)})
+        #Render the pre path
+        output$pre_dir_sc_out <- renderText({basename(screen_out$pre_dir_sc)})
+      }
     }
   })
 
-  output$fields_sc_new <- reactive(!(is.null(input$save_dir_sc)) &&
-                                    !(is.null(input$pre_dir_sc)))
+  output$fields_sc_new <- reactive(!(is.integer(input$save_dir_sc)) &&
+                                    !(is.integer(input$pre_dir_sc)))
   outputOptions(output, "fields_sc_new", suspendWhenHidden = FALSE)
 
 
@@ -517,7 +542,7 @@ shinyServer(function(input, output, session) {
 
  ###########################  Load a Project ##################################
 
-  observe({change_box("load_sc_box", !(is.null(input$load_sc)))})
+  observe({change_box("load_sc_box", !(is.integer(input$load_sc)))})
 
  # Extract the project file path
  shinyFileChoose(input,
@@ -531,7 +556,7 @@ shinyServer(function(input, output, session) {
     output$load_sc_out <- renderText({basename(screen_out$load_sc)})
   })
 
-  output$fields_sc_load <- reactive({!(is.null(input$load_sc))})
+  output$fields_sc_load <- reactive({!(is.integer(input$load_sc))})
   outputOptions(output, "fields_sc_load", suspendWhenHidden = FALSE)
 
   # Finalize the Project loading
@@ -573,7 +598,7 @@ shinyServer(function(input, output, session) {
   p_name_sav <- renderText({input$p_name_sav})
   sav_out$p_name_sav <- p_name_sav
 
-  observe({change_box("save_dir_sav_box", !(is.null(input$save_dir_sav)))})
+  observe({change_box("save_dir_sav_box", !(is.integer(input$save_dir_sav)))})
 
   # set the directory where the project will be stored
   shinyDirChoose(input,
@@ -582,77 +607,107 @@ shinyServer(function(input, output, session) {
                  filetypes = c('', 'csv'))
   save_dir_sav <- reactive(input$save_dir_sav)
   path_save_dir_sav <- reactive({
-    home <- normalizePath("~")
-    file.path(volumes[save_dir_sav()$root],
-              paste(unlist(save_dir_sav()$path[-1]),
-              collapse = .Platform$file.sep))
+    # 2020-02-12 NF
+    #cat("input$save_dir_sav value:\n")
+    #print(input$save_dir_sav)
+
+    if (is.integer(input$save_dir_sav)) {
+      cat("No save_dir_sav path has been set (shinyDirChoose)!\n\n")
+    } else {
+      cat("The save_dir_sav path has been set (shinyDirChoose)!\n\n")
+    }
+    parseDirPath(volumes, input$save_dir_sav)
   })
   output$save_dir_sav_out <- renderText({basename(path_save_dir_sav())})
 
  ####################  Set Pre and Post-instatllation Data #####################
   # Pre
-  observe({change_box("pre_dir_sav_box", !(is.null(input$pre_dir_sav)))})
+  observe({change_box("pre_dir_sav_box", !(is.integer(input$pre_dir_sav)))})
 
+  shinyDirChoose(input,
+                 'pre_dir_sav',
+                 roots = volumes,
+                 filetypes = c('', 'csv'))
   observe({
     if (input$next_init_1!=0 & input$type_init == 2 & input$new_init == 1){
+
       # set the directory from where the pre-installation will be read
-      shinyDirChoose(input,
-                     'pre_dir_sav',
-                     roots = volumes,
-                     filetypes = c('', 'csv'))
-       home <- normalizePath("~")
-       # get the pre data directory paths
-       sav_out$pre_dir_sav <- file.path(volumes[input$pre_dir_sav$root],
-                                        paste(unlist(input$pre_dir_sav$path[-1]),
-                                        collapse = .Platform$file.sep))
-       # get the pre data files paths
-       sav_out$pre_path_sav <- list.files(sav_out$pre_dir_sav,
-                                          "*\\.csv",
-                                          full.names = T,
-                                          include.dirs =F)
-       # get the pre data files names
-       sav_out$pre_names_sav <- list.files(sav_out$pre_dir_sav,
+      # 2020-02-12 NF
+      cat("input$pre_dir_sav value:\n")
+      print(parseDirPath(volumes, input$pre_dir_sav))
+
+      if (is.integer(input$pre_dir_sav)) {
+        cat("No pre_dir_sav path has been set (shinyFileSave)!\n\n")
+      } else {
+        cat("The pre_dir_sav path has been set (shinyFileSave)!\n\n")
+
+        home <- normalizePath("~")
+        # get the pre data directory paths
+        sav_out$pre_dir_sav <- parseDirPath(volumes, input$pre_dir_sav)
+        # sav_out$pre_dir_sav <- file.path(volumes[input$pre_dir_sav$root],
+        #                                  paste(unlist(input$pre_dir_sav$path[-1]),
+        #                                        collapse = .Platform$file.sep))
+        # get the pre data files paths
+        sav_out$pre_path_sav <- list.files(sav_out$pre_dir_sav,
                                            "*\\.csv",
-                                           full.names = F,
+                                           full.names = T,
                                            include.dirs =F)
-       #Render the pre path
-       output$pre_dir_sav_out <- renderText({basename(sav_out$pre_dir_sav)})
+        # get the pre data files names
+        sav_out$pre_names_sav <- list.files(sav_out$pre_dir_sav,
+                                            "*\\.csv",
+                                            full.names = F,
+                                            include.dirs =F)
+        #Render the pre path
+        output$pre_dir_sav_out <- renderText({basename(sav_out$pre_dir_sav)})
+      }
     }
   })
 
-  observe({change_box("post_dir_sav_box", !(is.null(input$post_dir_sav)))})
+  observe({change_box("post_dir_sav_box", !(is.integer(input$post_dir_sav)))})
 
+  shinyDirChoose(input,
+                 'post_dir_sav',
+                 roots = volumes,
+                 filetypes = c('', 'csv'))
   # Post
   observe({
     if (input$next_init_1!=0 & input$type_init == 2 & input$new_init == 1){
       # set the directory from where the post-installation will be read
-      shinyDirChoose(input,
-                     'post_dir_sav',
-                     roots = volumes,
-                     filetypes = c('', 'csv'))
-       home <- normalizePath("~")
-       # get the post data directory paths
-       sav_out$post_dir_sav <- file.path(volumes[input$post_dir_sav$root],
-                                        paste(unlist(input$post_dir_sav$path[-1]),
-                                        collapse = .Platform$file.sep))
-       # get the post data files paths
-       sav_out$post_path_sav <- list.files(sav_out$post_dir_sav,
+
+      # 2020-02-12 NF
+      cat("input$post_dir_sav value:\n")
+      print(input$post_dir_sav)
+
+      if (is.integer(input$post_dir_sav)) {
+        cat("No post_dir_sav path has been set (shinyFileSave)!\n\n")
+      } else {
+        cat("The post_dir_sav path has been set (shinyFileSave)!\n\n")
+
+        home <- normalizePath("~")
+        # get the post data directory paths
+        sav_out$post_dir_sav <- parseDirPath(volumes, input$post_dir_sav)
+        # sav_out$post_dir_sav <- file.path(volumes[input$post_dir_sav$root],
+        #                                 paste(unlist(input$post_dir_sav$path[-1]),
+        #                                 collapse = .Platform$file.sep))
+        # get the post data files paths
+        sav_out$post_path_sav <- list.files(sav_out$post_dir_sav,
                                            "*\\.csv",
                                            full.names = T,
                                            include.dirs =F)
-       # get the post data files names
-       sav_out$post_names_sav <- list.files(sav_out$post_dir_sav,
+        # get the post data files names
+        sav_out$post_names_sav <- list.files(sav_out$post_dir_sav,
                                             "*\\.csv",
                                             full.names = F,
                                             include.dirs =F)
-       #Render the post path
-       output$post_dir_sav_out <- renderText({basename(sav_out$post_dir_sav)})
+        #Render the post path
+        output$post_dir_sav_out <- renderText({basename(sav_out$post_dir_sav)})
+      }
     }
   })
 
-  output$fields_sav_new <- reactive(!(is.null(input$save_dir_sav)) &&
-                                    !(is.null(input$pre_dir_sav)) &&
-                                    !(is.null(input$post_dir_sav)))
+  output$fields_sav_new <- reactive(!(is.integer(input$save_dir_sav)) &&
+                                    !(is.integer(input$pre_dir_sav)) &&
+                                    !(is.integer(input$post_dir_sav)))
   outputOptions(output, "fields_sav_new", suspendWhenHidden = FALSE)
 
 
@@ -1623,7 +1678,7 @@ shinyServer(function(input, output, session) {
 
   ###########################  Load a Project ##################################
 
-  observe({change_box("load_sav_box", !(is.null(input$load_sav)))})
+  observe({change_box("load_sav_box", !(is.integer(input$load_sav)))})
 
   # Extract the project file path
   shinyFileChoose(input,
@@ -1632,12 +1687,22 @@ shinyServer(function(input, output, session) {
                   filetypes = c('', 'rds'))
 
    observeEvent(input$load_sav, {
+     # 2020-02-12 NF
+     cat("input$load_sav value:\n")
+     print(input$load_sav)
+
+     if (is.integer(input$load_sav)) {
+       cat("No load_sav path has been set (shinyFileChoose)!\n\n")
+     } else {
+       cat("The load_sav path has been set (shinyFileChoose)!\n\n")
+     }
+
      load_sav <- parseFilePaths(roots=volumes, input$load_sav)
      sav_out$load_sav <- as.character(load_sav$datapath)
      output$load_sav_out <- renderText({basename(sav_out$load_sav)})
    })
 
-   output$fields_sav_load <- reactive(!(is.null(input$load_sav)))
+   output$fields_sav_load <- reactive(!(is.integer(input$load_sav)))
    outputOptions(output, "fields_sav_load", suspendWhenHidden = FALSE)
 
    # Finalize the Project loading

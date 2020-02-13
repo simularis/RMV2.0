@@ -28,7 +28,7 @@ Imports:
     xts (>= 0.10-0),
     shiny (>= 1.0.5),
     shinydashboard (>= 0.6.1),
-    shinyFiles (== 0.6.2),
+    shinyFiles (>= 0.6.2),
     shinyjs (>= 0.9.1),
     dygraphs (>= 1.1.1.4),
     plotly (>= 4.7.1),
