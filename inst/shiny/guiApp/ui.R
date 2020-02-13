@@ -245,7 +245,7 @@ dashboardPage(skin = "red",
       tabItem(tabName = "initialization",
         fluidPage(title = "initialization",
           fluidRow(
-            column(width = 3,
+            column(width = 6,
               box(title = "Project Type",
                   width = 12,
                   solidHeader = T,
@@ -276,7 +276,7 @@ dashboardPage(skin = "red",
               )# end of box
             ),# end of column
             conditionalPanel(condition = "input.next_init_1 && input.type_init == 1 && input.new_init == 1",
-              column(width = 4,
+              column(width = 6,
                 box(title = "Screening Mode",
                     width = 12,
                     solidHeader = T,
@@ -331,14 +331,15 @@ dashboardPage(skin = "red",
                                          width ="100%")
                      )#end of column
                    )
-                )#end of box
+                ),#end of box
+
+                infoBoxOutput("intEndBox_sc",width = 12)
+
               ),# end of column
-              column(width = 4,
-                     infoBoxOutput("intEndBox_sc",width = 12)
-              )#end of column
+
             ),# end of conditionalPanel
             conditionalPanel(condition = "input.next_init_1 && input.type_init == 1 && input.new_init == 2",
-              column(width = 4,
+              column(width = 6,
                 box(title = "Screening Mode",
                     width = 12,
                     solidHeader = T,
@@ -370,9 +371,11 @@ dashboardPage(skin = "red",
                      )#end of column
                    )#end of cp
                 )#end of box
+
+                ,infoBoxOutput("intEndBox_sc_lo",width = 12)
+
               ),# end of column
-              column(width = 4,
-                     infoBoxOutput("intEndBox_sc_lo",width = 12)
+              column(width = 4
               )#end of column
             ),# end of conditionalPanel
             conditionalPanel(condition = "input.next_init_1 && input.type_init == 2 && input.new_init == 1",
