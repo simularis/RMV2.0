@@ -63,7 +63,6 @@ shinyServer(function(input, output, session) {
   # Set the reactive var where the different variables will be stored
   screen_out <- reactiveValues()
 
-
   ########################  Create a new Project ###############################
 
   # set the project name
@@ -109,6 +108,8 @@ shinyServer(function(input, output, session) {
   observe({
     if (input$next_init_1!=0 & input$type_init == 1 & input$new_init == 1){
       # set the directory from where the pre data will be read
+
+      screen_out$fahrenheit = (input$fahrenheit_toggle == "temp_fahrenheit")
 
       # 2020-02-12 NF
       cat("input$pre_dir_sc value:\n")
@@ -574,6 +575,8 @@ shinyServer(function(input, output, session) {
     screen_out$model_obj_list <- load_res$model_obj_list
     screen_out$files_names_mod <- load_res$files_names_mod
     screen_out$fsu_est_tab <- load_res$fsu_est_tab
+    screen_out$fahrenheit <- load_res$fahrenheit
+
 
     output$intEndBox_sc_lo <- renderInfoBox({
       infoBox(h4("The project is loaded"),

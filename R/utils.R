@@ -196,7 +196,7 @@ data_load <- function(files_path, files_names, var_out, Post = T, clean = T){
 #' @param Model Character string that correspond to the name of the used model
 #' @param pam_list A list with information about the hyperparameters of the considered model
 #' @param days_off_path A path of the file that include the date of the days off (i.e., holidays)
-#' @return train_model a list that contains a list of the results and a vector of indices data 
+#' @return train_model a list that contains a list of the results and a vector of indices data
 #' where the model failed to produce a result
 #'
 #' @export
@@ -233,8 +233,11 @@ train_model <- function(var_out,
            "TOWT" = try(res_baseline <- towt_baseline(train_Data = pre_Data_i,
                                            pred_Data = pre_Data_i,
                                            timescaleDays = pam_list$timescaleDays,
-                                           intervalMinutes = Data_pre_summary[i,6]
-                                           ), silent = T),
+                                           intervalMinutes = Data_pre_summary[i,6],
+                                           fahrenheit = var_out$fahrenheit,
+                                           #verbosity = 5
+                                           ),
+                        silent = T),
            "GBM" = try(res_baseline <- gbm_baseline(train_Data = pre_Data_i,
                                                     pred_Data = pre_Data_i,
                                                     days_off_path = days_off_path,
@@ -249,7 +252,6 @@ train_model <- function(var_out,
                                                               by=1),
                                                     lr = as.numeric(pam_list$lr)
                                                     ), silent = F)
-
          )
 
        }
@@ -263,8 +265,11 @@ train_model <- function(var_out,
            "TOWT" = try(res_baseline <- towt_baseline(train_Data = pre_Data_i,
                                            pred_Data = post_Data_i,
                                            timescaleDays = pam_list$timescaleDays,
-                                           intervalMinutes = Data_pre_summary[i,6]
-                                           ), silent = T),
+                                           intervalMinutes = Data_pre_summary[i,6],
+                                           fahrenheit = var_out$fahrenheit,
+                                           #verbosity = 5
+                                           ),
+                        silent = T),
            "GBM" = try(res_baseline <- gbm_baseline(train_Data = pre_Data_i,
                                                     pred_Data = post_Data_i,
                                                     days_off_path = days_off_path,
@@ -443,8 +448,8 @@ pred_accuracy <- function(baseline_obj){
 
 #' Predictions Data Savings
 #'
-#' \code{save_predictions} This function extract and save predictions 
-#' from baseline model objects 
+#' \code{save_predictions} This function extract and save predictions
+#' from baseline model objects
 #'
 #' @param model_obj_list A list of baseline objects
 #' @param save_results_path The path where the files will be saved
@@ -452,7 +457,7 @@ pred_accuracy <- function(baseline_obj){
 #'
 #' @export
 
-save_predictions <- function(model_obj_list, 
+save_predictions <- function(model_obj_list,
                              save_results_path = NULL,
                              post = TRUE){
   models_list <- model_obj_list$models_list
@@ -468,8 +473,8 @@ save_predictions <- function(model_obj_list,
       pre_prediction_file_name <- file.path(save_sesults_path_pre,
                                             paste("pre_prediction_",i,sep=""))
       write.csv(pre_prediction,
-                file = pre_prediction_file_name, 
-                row.names = FALSE) 
+                file = pre_prediction_file_name,
+                row.names = FALSE)
   }
   if (post){
     save_sesults_path_post <- file.path(save_results_path, "post_predictions")
@@ -484,8 +489,8 @@ save_predictions <- function(model_obj_list,
       post_prediction_file_name <- file.path(save_sesults_path_post,
                                              paste("post_prediction_",i,sep=""))
       write.csv(post_prediction,
-                file = post_prediction_file_name, 
-                row.names = FALSE) 
-    } 
+                file = post_prediction_file_name,
+                row.names = FALSE)
+    }
   }
 }

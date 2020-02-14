@@ -264,6 +264,11 @@ dashboardPage(skin = "red",
                                   choices = list("Create a New Project" = 1,
                                                  "Open an Existing Project" = 2),
                                   selected = 1)
+                     ,radioButtons("fahrenheit_toggle",
+                                   "Temperature units",
+                                   c("deg C" = "temp_celsius",
+                                     "deg F" = "temp_fahrenheit"),
+                                   selected="temp_celsius")
                  ),#end of box
                  column(width = 12,
                         conditionalPanel(condition = "input.next_init_1 == 0",

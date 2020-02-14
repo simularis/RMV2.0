@@ -341,6 +341,9 @@ fitLBNLregress <- function(timeVec,loadVec,tempVec,
 				checkknots = F # we have sufficient data below the lowest knot
 			}
 		} #endwhile
+		cat("In fitLBNLregress, reduced tempKnots:\n")
+		print(tempKnots)
+
 		tempMat = piecewiseVariables(tempVec,tempKnots)
 		tempMatPred = piecewiseVariables(tempVecPred,tempKnots)
 		tMname=rep(NA,ncol(tempMat))
@@ -445,11 +448,29 @@ makeBaseline <- function(dataTime, dataLoad, dataTemp, predTime, predTemp,
 	WeightMatrix = matrix(NA,nrow=nModelRuns,ncol=length(predTime))
 
 	if (verbose > 2) {print(paste("running regression at",nModelRuns,"steps"))}
+
+	# Use Progress class, increment progress for each model run in child process
+	# 2020-02-14 NF
+	progress <- Progress$new(session=getDefaultReactiveDomain(), min=1, max=nModelRuns)
+	on.exit(progress$close())
+	progress$set(message = paste('Model run',0,'of',nModelRuns),
+	             detail = 'Starting...')
+
 	for (irun in 1:nModelRuns) {
 		if (verbose > 4) { print(paste("starting model run number",irun)) }
+
+	  #progress$set(value=irun,detail=paste("starting model run number",irun))
+
 		tcenter = dataTime[pointlist[irun]]
 		tDiff = as.numeric(difftime(tcenter,dataTime,units="days"))
 		tDiffPred = as.numeric(difftime(tcenter,predTime,units="days"))
+
+		# Debug info verbose not set 2020-02-14 NF
+		#cat("For time weights, tcenter = ",strftime(tcenter,usetz=T),fill=T)
+		cat("For time weights, tcenter = ",format(tcenter,usetz=T),fill=T)
+		progress$set(value=irun,
+		             message = paste('Model run',irun,'of',nModelRuns),
+		             detail=paste("tcenter =",format(tcenter,usetz=T)))
 
 		# Statistical weight for training period
 		weightvec = timescaleDays^2/(timescaleDays^2 + tDiff^2)
