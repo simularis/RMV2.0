@@ -410,6 +410,10 @@ fitLBNLregress <- function(timeVec,loadVec,tempVec,
 	Out = NULL
 	Out$training = data.frame(timeVec,nLoadTime,trainingLoadPred)
 	Out$predictions = data.frame(predTime,nPredTime,predVec)
+	# Add detail 2020-02-13 NF
+  Out$amod = amod
+  Out$bmod = bmod
+  Out$tempKnots = tempKnots
 
 	if (verbose > 3) {print("leaving fitLBNLregress()")}
 	return(Out)
@@ -480,6 +484,10 @@ makeBaseline <- function(dataTime, dataLoad, dataTemp, predTime, predTemp,
 	Out$WeightMatrix = WeightMatrix
 	Out$trainTime = dataTime
 	Out$trainBaseline = finalTrainBaseline
+
+	# Add detail of model setup 2020-02-13 NF
+	Out$regOut = regOut
+
 	if (verbose > 2) { print("leaving makeBaseline()") }
 	return(Out)
 }
