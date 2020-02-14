@@ -4,8 +4,13 @@
 \alias{train_model}
 \title{Train Baseline models}
 \usage{
-train_model(var_out, screen = T, Model = "TOWT", pam_list = NULL,
-  days_off_path = NULL)
+train_model(
+  var_out,
+  screen = T,
+  Model = "TOWT",
+  pam_list = NULL,
+  days_off_path = NULL
+)
 }
 \arguments{
 \item{var_out}{a shiny reactiveValues object where the taining data are stored}

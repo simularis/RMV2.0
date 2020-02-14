@@ -4,8 +4,14 @@
 \alias{act_plot}
 \title{Plot of the actual pre or post installation data}
 \usage{
-act_plot(Data, title = NULL, low_range_0 = NULL, high_range_0 = NULL,
-  low_range_T_0 = NULL, high_range_T_0 = NULL)
+act_plot(
+  Data,
+  title = NULL,
+  low_range_0 = NULL,
+  high_range_0 = NULL,
+  low_range_T_0 = NULL,
+  high_range_T_0 = NULL
+)
 }
 \arguments{
 \item{Data}{A data frame of the actual observations}

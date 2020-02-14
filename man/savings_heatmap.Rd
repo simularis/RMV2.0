@@ -4,8 +4,14 @@
 \alias{savings_heatmap}
 \title{Savings heatmap}
 \usage{
-savings_heatmap(baseline_obj, title = NULL,
-  colors = colorRamps::matlab.like(100), zauto = T, zmin = 0, zmax = 0)
+savings_heatmap(
+  baseline_obj,
+  title = NULL,
+  colors = colorRamps::matlab.like(100),
+  zauto = T,
+  zmin = 0,
+  zmax = 0
+)
 }
 \arguments{
 \item{baseline_obj}{A baseline object, which is produced by the baseline function}

@@ -4,9 +4,15 @@
 \alias{post_plot}
 \title{Plot of the post-installation period data}
 \usage{
-post_plot(baseline_obj, title = NULL, plot_group = NULL,
-  low_range_0 = NULL, high_range_0 = NULL, low_range_T_0 = NULL,
-  high_range_T_0 = NULL)
+post_plot(
+  baseline_obj,
+  title = NULL,
+  plot_group = NULL,
+  low_range_0 = NULL,
+  high_range_0 = NULL,
+  low_range_T_0 = NULL,
+  high_range_T_0 = NULL
+)
 }
 \arguments{
 \item{baseline_obj}{A baseline object, which is produced by the baseline model function}

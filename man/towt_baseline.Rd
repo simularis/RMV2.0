@@ -4,9 +4,16 @@
 \alias{towt_baseline}
 \title{Time Of the Week and Temperature baseline model function.}
 \usage{
-towt_baseline(train_path = NULL, pred_path = NULL, train_Data = NULL,
-  pred_Data = NULL, timescaleDays = 14, verbosity = 1,
-  intervalMinutes = 15, fahrenheit = T)
+towt_baseline(
+  train_path = NULL,
+  pred_path = NULL,
+  train_Data = NULL,
+  pred_Data = NULL,
+  timescaleDays = 14,
+  verbosity = 1,
+  intervalMinutes = 15,
+  fahrenheit = T
+)
 }
 \arguments{
 \item{train_path}{The path of the file from which the training data are to be read from.}

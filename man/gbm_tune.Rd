@@ -4,8 +4,17 @@
 \alias{gbm_tune}
 \title{Gradient boosting machine tuning function.}
 \usage{
-gbm_tune(Data, k_folds, variables = c("Temp", "tow"), ncores,
-  cv_blocks = "none", iter, depth, lr, subsample)
+gbm_tune(
+  Data,
+  k_folds,
+  variables = c("Temp", "tow"),
+  ncores,
+  cv_blocks = "none",
+  iter,
+  depth,
+  lr,
+  subsample
+)
 }
 \arguments{
 \item{Data}{A dataframe.}

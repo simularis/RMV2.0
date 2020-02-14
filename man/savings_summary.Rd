@@ -4,7 +4,7 @@
 \alias{savings_summary}
 \title{Savings summary}
 \usage{
-savings_summary(sav_out)
+savings_summary(sav_out, inCL)
 }
 \arguments{
 \item{sav_out}{a shiny reactiveValues object where the baseline object and the pre/post data are stored}

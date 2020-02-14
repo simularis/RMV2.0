@@ -4,8 +4,14 @@
 \alias{eload_heatmap}
 \title{Eload heatmap}
 \usage{
-eload_heatmap(Data, title = NULL, colors = colorRamps::matlab.like(100),
-  zauto = T, zmin = 0, zmax = 0)
+eload_heatmap(
+  Data,
+  title = NULL,
+  colors = colorRamps::matlab.like(100),
+  zauto = T,
+  zmin = 0,
+  zmax = 0
+)
 }
 \arguments{
 \item{Data}{a data frame to plot}

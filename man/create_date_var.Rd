@@ -4,8 +4,13 @@
 \alias{create_date_var}
 \title{Create an input variable corresponding to given intervals}
 \usage{
-create_date_var(Data, intervals_path = NULL, start = NULL, end = NULL,
-  var_name = "date_off")
+create_date_var(
+  Data,
+  intervals_path = NULL,
+  start = NULL,
+  end = NULL,
+  var_name = "date_off"
+)
 }
 \arguments{
 \item{Data}{A dataframe of pre or post-installation data.}

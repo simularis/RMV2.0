@@ -4,8 +4,14 @@
 \alias{pre_plot}
 \title{Plot of the pre-installation period data}
 \usage{
-pre_plot(baseline_obj, title = NULL, low_range_0 = NULL,
-  high_range_0 = NULL, low_range_T_0 = NULL, high_range_T_0 = NULL)
+pre_plot(
+  baseline_obj,
+  title = NULL,
+  low_range_0 = NULL,
+  high_range_0 = NULL,
+  low_range_T_0 = NULL,
+  high_range_T_0 = NULL
+)
 }
 \arguments{
 \item{baseline_obj}{A baseline object, which is produced by the baseline model function}

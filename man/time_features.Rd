@@ -25,6 +25,5 @@ Data data frame that contains new columns corresponding to the extract time feat
 }
 }
 \description{
-\code{number_of_days} This function computes the number of days for which data
-is available
+\code{time_features} This function time features from time stamps
 }

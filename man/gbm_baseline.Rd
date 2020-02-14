@@ -4,12 +4,22 @@
 \alias{gbm_baseline}
 \title{Gradient boosting machine baseline model function.}
 \usage{
-gbm_baseline(train_path = NULL, pred_path = NULL, days_off_path = NULL,
-  train_Data = NULL, pred_Data = NULL, k_folds = 5,
-  variables = c("Temp", "tow"), ncores = parallel::detectCores(logical = F),
-  cv_blocks = "weeks", iter = seq(from = 50, to = 300, by = 25),
-  depth = c(3:7), lr = c(0.05, 0.1), subsample = c(0.5),
-  verbose = FALSE)
+gbm_baseline(
+  train_path = NULL,
+  pred_path = NULL,
+  days_off_path = NULL,
+  train_Data = NULL,
+  pred_Data = NULL,
+  k_folds = 5,
+  variables = c("Temp", "tow"),
+  ncores = parallel::detectCores(logical = F),
+  cv_blocks = "weeks",
+  iter = seq(from = 50, to = 300, by = 25),
+  depth = c(3:7),
+  lr = c(0.05, 0.1),
+  subsample = c(0.5),
+  verbose = FALSE
+)
 }
 \arguments{
 \item{train_path}{The path of the file from which the training data are to be read.}
@@ -41,7 +51,7 @@ to the standard k-fold cross validation technique.}
 \item{subsample}{A vector with combination of subsamples.}
 }
 \value{
-a gbm_baseline object, which alist with the following components:
+a gbm_baseline object, which is a list with the following components:
 \describe{
   \item{gbm_model}{an object that has been created by the function xgboost,
    and which correspond to the optimal gbm model.}
