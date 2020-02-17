@@ -447,6 +447,8 @@ makeBaseline <- function(dataTime, dataLoad, dataTemp, predTime, predTemp,
 	TrainWeightMatrix = matrix(NA, nrow=nModelRuns,ncol=length(dataTime))
 	WeightMatrix = matrix(NA,nrow=nModelRuns,ncol=length(predTime))
 
+	regOutList = vector(mode="list",length=nModelRuns)
+
 	if (verbose > 2) {print(paste("running regression at",nModelRuns,"steps"))}
 
 	# Use Progress class, increment progress for each model run in child process
@@ -493,6 +495,8 @@ makeBaseline <- function(dataTime, dataLoad, dataTemp, predTime, predTemp,
 		predOut = regOut$predictions
 		PredMatrix[irun,] = predOut$predVec
 		WeightMatrix[irun,] = weightvecPred
+
+		regOutList[[irun]] = regOut
 	}
 	finalBaseline = apply(PredMatrix*WeightMatrix,2,sum)/apply(WeightMatrix,2,sum)
 	finalTrainBaseline =
@@ -507,7 +511,7 @@ makeBaseline <- function(dataTime, dataLoad, dataTemp, predTime, predTemp,
 	Out$trainBaseline = finalTrainBaseline
 
 	# Add detail of model setup 2020-02-13 NF
-	Out$regOut = regOut
+	Out$regOutList = regOutList
 
 	if (verbose > 2) { print("leaving makeBaseline()") }
 	return(Out)
