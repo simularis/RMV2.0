@@ -1,6 +1,7 @@
 # Libraries
 library(ggplot2)
 library(dplyr)
+library(glue)
 #library(patchwork) # To display 2 charts together
 #library(hrbrthemes)
 
@@ -15,11 +16,45 @@ Project <- readRDS(rds_file)
 cat("Your project has the following models.",fill=T)
 print(names(Project$model_obj_list$models_list))
 
-View(Project)
+# Uncomment to have a graphical View appear and show you everything from the project file.
+#View(Project)
 
+# These will just print text info summary of the project file structure.
+cat("Project file had the following structure:",fill=T)
+print(names(Project))
+# Typical for screening analysis
+# [1] "files_path_sc"      "fahrenheit"         "Data_pre_summary_0" "Data_pre_summary"   "files_names"        "model_obj_list"
+# [7] "p_name_sc"          "Data_pre"           "pre_dir_sc"         "files_names_mod"    "Model"
+# Typical for screening analysis
+# [1] "Data_pre_summary_0"  "load"                "files_names"         "post_names_sav"      "pre_names_sav"
+# [6] "Data_pre"            "files_names_mod"     "p_name_sav"          "post_path_sav"       "Data_pre_summary"
+# [11] "fahrenheit"          "post_dir_sav"        "model_obj_list"      "pre_path_sav"        "Data_post"
+# [16] "Data_post_summary"   "nre_done"            "Data_post_summary_0" "pre_dir_sav"         "Model"
+
+cat("Project file has Data_post? (is savings analysis?)",fill=T)
+print("Data_post" %in% names(Project))
+isSavings = "Data_post" %in% names(Project)
+projectType <- if (isSavings) {"savings!"} else {"screenings!"}
+
+cat("Type of models used?",fill=T)
+print(Project$Model)
+if (Project$Model != "TOWT") {
+  cat("Warning: this script only understands TOWT models.",fill=T)
+}
+
+cat("Attempting to understand the first TOWT model. Grokking ...",fill=T)
 # Pick a model from the models_list by number, then load its variables into the workspace
 i <- 1
 attach(Project$model_obj_list$models_list[[i]]$towt_model,name="towt_model")
+
+dataTime <- if (isSavings) {timeVec} else {trainTime}
+npoints = length(dataTime)
+t0 = min(dataTime,na.rm=T)
+t1 = max(dataTime,na.rm=T)
+deltaT = as.numeric(difftime(t1,t0,units="days"))
+nsegments = max(1,ceiling(deltaT/timescaleDays))
+segmentwidth = (npoints-1)/nsegments
+segmentDeltaT = deltaT / nsegments
 
 ## Use built-in library for plotting all weighting functions together, very slowly
 #plot(timeVec, WeightMatrix[1,], type='l', ylab='WeightMatrix[j,]')
@@ -47,9 +82,22 @@ df2 <- reshape2::melt(data=df,id.vars="day")
 
 ## Use modern library to plot weighting functions together
 ## https://stackoverflow.com/questions/2564258/plot-two-graphs-in-same-plot-in-r
-ggplot(data = df2, aes(x = day, y = value, colour = variable)) + geom_line() +
-  theme(aspect.ratio=0.3)
-#ggsave("my_weights_plot.png")
+figtitle0 <- if (isSavings) {
+  "Raw weights for weighted average of baseline models in post-period\n(Denominator is sum of weights)"
+  } else {
+    "Weights used to generate baseline models\n(Weighted least squares linear regression)"
+  }
+figtitle <- glue("{figtitle0}
+                  deltaT = {format(deltaT,digits=4)} days, \\
+                  timescaleDays = {timescaleDays}, \\
+                  segmentDays = {format(segmentDeltaT, digits=4)}")
+cat(figtitle)
+fig <- ggplot(data = df2, aes(x = day, y = value, colour = variable)) + geom_line() +
+  theme(aspect.ratio=0.3) +
+  ggtitle(figtitle)
+print(fig)
+ggsave("my_weights_plot.png")
+rm(figtitle,fig)
 
 # Note that WeightMatrix and timeVec are for the prediction period.
 # For the training data, we are saving only trainTime, not the weights.
@@ -88,6 +136,8 @@ print(regOut$tempKnots)
 cat(paste("Number of parameters in occupied period model (excluding tempKnots)  :",regOut$amod$rank),fill=T)
 cat(paste("Number of parameters in unoccupied period model (excluding tempKnots):",regOut$bmod$rank),fill=T)
 cat(fill=T)
+
+
 }
 
 # Show some or all of the coefficients in a table
@@ -118,6 +168,6 @@ print(regOut$bmod)
 
 ## Clean up: remove global variables from workspace and detach scope
 ## Comment out these lines if you want to inspect further
-rm(rds_file, i, df, df2, regOut)
+rm(rds_file, isSavings, projectType, i, df, df2, tCenters, nModelRuns, irun, regOut)
 detach("towt_model")
 rm(Project)
