@@ -634,6 +634,8 @@ shinyServer(function(input, output, session) {
   observe({
     if (input$next_init_1!=0 & input$type_init == 2 & input$new_init == 1){
 
+      sav_out$fahrenheit = (input$fahrenheit_toggle == "temp_fahrenheit")
+
       # set the directory from where the pre-installation will be read
       # 2020-02-12 NF
       cat("input$pre_dir_sav value:\n")
@@ -1726,6 +1728,7 @@ shinyServer(function(input, output, session) {
      sav_out$model_obj_list <- load_res$model_obj_list
      sav_out$files_names_mod <- load_res$files_names_mod
      sav_out$sav_est_tab <- load_res$sav_est_tab
+     sav_out$fahrenheit <- load_res$fahrenheit
      #  -----  Deprecated  -----
      # exclude the uncertainty calculation
      sav_out$CL <- load_res$CL
