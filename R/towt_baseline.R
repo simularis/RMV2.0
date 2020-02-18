@@ -227,6 +227,9 @@ fitLBNLregress <- function(timeVec,loadVec,tempVec,
 	doTemperatureModel=doTemperatureModel,verbose=1) {
 
 	if (verbose > 3) {print("starting fitLBNLregress()")}
+
+  # TODO: This logic block has no effect since okUseForOcc is unused!
+  # TODO: Should occupancy vary across model runs?
 	if (!is.null(weightvec)) {
 		# if weights are specified then base occupied/unoccupied decision
 		# just on the relatively higher weights
@@ -417,6 +420,9 @@ fitLBNLregress <- function(timeVec,loadVec,tempVec,
   Out$amod = amod
   Out$bmod = bmod
   Out$tempKnots = tempKnots
+  Out$occVec = occVec
+  Out$okocc = okocc
+
 
 	if (verbose > 3) {print("leaving fitLBNLregress()")}
 	return(Out)
@@ -512,6 +518,8 @@ makeBaseline <- function(dataTime, dataLoad, dataTemp, predTime, predTemp,
 
 	# Add detail of model setup 2020-02-13 NF
 	Out$regOutList = regOutList
+	Out$timescaleDays = timescaleDays
+	Out$pointlist = pointlist
 
 	if (verbose > 2) { print("leaving makeBaseline()") }
 	return(Out)

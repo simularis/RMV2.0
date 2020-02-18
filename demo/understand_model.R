@@ -8,7 +8,9 @@ library(dplyr)
 ## Read the "project.rds" file stored by RMV2.0
 #rds_file <- "C:/RMV2.0 Workshop/uncertain_savings3/Project_02.13.rds"
 #rds_file <- "C:/RMV2.0 Workshop/uncertain_savings4/Project_02.16.rds"
-rds_file <- "C:/RMV2.0 Workshop/uncertain_screening1/Project_02.17.rds"
+#rds_file <- "C:/RMV2.0 Workshop/uncertain_screening1/Project_02.17.rds"
+#rds_file <- "C:/RMV2.0 Workshop/uncertain_screening2/Project_02.18.rds"
+rds_file <- "C:/RMV2.0 Workshop/uncertain_savings5/Project_02.18.rds"
 Project <- readRDS(rds_file)
 cat("Your project has the following models.",fill=T)
 print(names(Project$model_obj_list$models_list))
@@ -49,8 +51,25 @@ ggplot(data = df2, aes(x = day, y = value, colour = variable)) + geom_line() +
   theme(aspect.ratio=0.3)
 #ggsave("my_weights_plot.png")
 
+# Note that WeightMatrix and timeVec are for the prediction period.
+# For the training data, we are saving only trainTime, not the weights.
+# For a savings project, prediction and training time intervals may be different!
+
+
 ## Proceed with this step only if you have modified the code to save extra variables
 #Project$model_obj_list$models_list[[1]]$towt_model$regOutList
+
+cat("The hyperparameter timescaleDays",fill=T)
+print(timescaleDays)
+cat("the index of timestamps used for weights",fill=T)
+print(pointlist)
+cat("the re-computed timestamps used for weights",fill=T)
+#for (point in pointlist) {
+#  print(trainTime[point])
+#}
+tCenters = trainTime[pointlist]
+print(tCenters)
+
 nModelRuns <- length(regOutList)
 cat(paste("There are ",nModelRuns,"model runs."),fill=T)
 for (irun in 1:nModelRuns) {
@@ -68,6 +87,7 @@ print(regOut$tempKnots)
 
 cat(paste("Number of parameters in occupied period model (excluding tempKnots)  :",regOut$amod$rank),fill=T)
 cat(paste("Number of parameters in unoccupied period model (excluding tempKnots):",regOut$bmod$rank),fill=T)
+cat(fill=T)
 }
 
 # Show some or all of the coefficients in a table
@@ -88,15 +108,16 @@ print(regOut$bmod)
 # What information was missing in project files?
 # * For towt_models: TempKnots and Model regression (regOut) for each model run (resolved).
 # * Note that based on defaults for lm(model=TRUE), the input data frame is saved in regOut$model.
-# What remains missing?
-# * For towt_models: We are not storing the timestamps used for weights.
+# * For towt_models: We are not storing the timestamps used for weights. (resolved)
 #   (pointlist, used for tcenter = dataTime[pointlist[irun]]).
-# * The hyperparameter timescaleDays.
+# * The hyperparameter timescaleDays. (resolved)
+
+# What remains missing?
 # * Also, model improvement suggestion: choose tempKnots via k-means cluster analysis.
 
 
 ## Clean up: remove global variables from workspace and detach scope
 ## Comment out these lines if you want to inspect further
-rm(rds_file, i, df, df2)
+rm(rds_file, i, df, df2, regOut)
 detach("towt_model")
 rm(Project)
