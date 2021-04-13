@@ -459,10 +459,13 @@ makeBaseline <- function(dataTime, dataLoad, dataTemp, predTime, predTemp,
 
 	# Use Progress class, increment progress for each model run in child process
 	# 2020-02-14 NF
+	# Only show Progress bar update if running in a shiny app
+	if (require('shiny') & isRunning()) {
 	progress <- Progress$new(session=getDefaultReactiveDomain(), min=1, max=nModelRuns)
 	on.exit(progress$close())
 	progress$set(message = paste('Model run',0,'of',nModelRuns),
 	             detail = 'Starting...')
+	}
 
 	for (irun in 1:nModelRuns) {
 		if (verbose > 4) { print(paste("starting model run number",irun)) }
@@ -476,9 +479,11 @@ makeBaseline <- function(dataTime, dataLoad, dataTemp, predTime, predTemp,
 		# Debug info verbose not set 2020-02-14 NF
 		#cat("For time weights, tcenter = ",strftime(tcenter,usetz=T),fill=T)
 		cat("For time weights, tcenter = ",format(tcenter,usetz=T),fill=T)
+		if (require('shiny') & isRunning()) {
 		progress$set(value=irun,
 		             message = paste('Model run',irun,'of',nModelRuns),
 		             detail=paste("tcenter =",format(tcenter,usetz=T)))
+		}
 
 		# Statistical weight for training period
 		weightvec = timescaleDays^2/(timescaleDays^2 + tDiff^2)
