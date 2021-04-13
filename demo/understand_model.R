@@ -11,13 +11,14 @@ library(glue)
 #rds_file <- "C:/RMV2.0 Workshop/uncertain_savings4/Project_02.16.rds"
 #rds_file <- "C:/RMV2.0 Workshop/uncertain_screening1/Project_02.17.rds"
 #rds_file <- "C:/RMV2.0 Workshop/uncertain_screening2/Project_02.18.rds"
-rds_file <- "C:/RMV2.0 Workshop/uncertain_savings5/Project_02.18.rds"
+#rds_file <- "C:/RMV2.0 Workshop/uncertain_savings5/Project_02.18.rds"
+rds_file <- "C:/RMV2.0 Workshop/something/Project_02.19.rds"
 Project <- readRDS(rds_file)
 cat("Your project has the following models.",fill=T)
 print(names(Project$model_obj_list$models_list))
 
 # Uncomment to have a graphical View appear and show you everything from the project file.
-#View(Project)
+View(Project)
 
 # These will just print text info summary of the project file structure.
 cat("Project file had the following structure:",fill=T)
@@ -25,7 +26,7 @@ print(names(Project))
 # Typical for screening analysis
 # [1] "files_path_sc"      "fahrenheit"         "Data_pre_summary_0" "Data_pre_summary"   "files_names"        "model_obj_list"
 # [7] "p_name_sc"          "Data_pre"           "pre_dir_sc"         "files_names_mod"    "Model"
-# Typical for screening analysis
+# Typical for savings analysis
 # [1] "Data_pre_summary_0"  "load"                "files_names"         "post_names_sav"      "pre_names_sav"
 # [6] "Data_pre"            "files_names_mod"     "p_name_sav"          "post_path_sav"       "Data_pre_summary"
 # [11] "fahrenheit"          "post_dir_sav"        "model_obj_list"      "pre_path_sav"        "Data_post"

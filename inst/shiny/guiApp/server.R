@@ -67,7 +67,7 @@ shinyServer(function(input, output, session) {
 
   # set the project name
   p_name_sc <- renderText({input$p_name_sc})
-  screen_out$p_name_sc <- p_name_sc
+  observe({screen_out$p_name_sc <- p_name_sc()})
 
   observe({change_box("save_dir_sc_box", !(is.integer(input$save_dir_sc)))})
 

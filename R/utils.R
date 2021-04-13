@@ -26,9 +26,19 @@ save_session <- function(save_dir,project_name,results){
                  detail = 'This may take a while...',
                  value = 0,
       {
-        results_list <- reactiveValuesToList(results)
         path_save <- paste(save_dir,.Platform$file.sep,project_name, ".rds",sep="")
+        cat(glue('Preparing to save session to "{path_save}" ...'),fill=T)
+        #cat("Isolating and listing reactive values ...",fill=T)
+        #results_list <- isolate(reactiveValuesToList(results))
+        cat("Listing reactive values ... ")
+        results_list <- reactiveValuesToList(results)
+        cat("in-memory size of data ...")
+        srl <- object.size(results_list)
+        print(srl, units="KiB") # IEC unit KiB as displayed by windows explorer
         saveRDS(results_list, file = path_save)
+        cat("Done saving. Size of the file: ")
+        sf <- structure(file.size(path_save),class="object_size")
+        print(sf, units="KiB")
     })
   })
 }
