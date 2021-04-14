@@ -56,7 +56,17 @@ towt_baseline <- function(train_path = NULL,
   train <- towt_time_var(train)
   train <- clean_Temp(train)
   train <- clean_eload(train)
-  train$time <- as.POSIXlt(train$time)
+  # As of R 3.5.0, as.POSIXlt() has new argument tryFormats and defaults.
+  # Old data files were saved with format %m/%d/%y %H:%M, which worked in R <= 3.4.3.
+  # First try the legacy formats, then allow ISO formats.
+  tryFormats <- c("%m/%d/%Y %H:%M:%OS",
+                  "%m/%d/%y %H:%M:%OS",
+                  "%m/%d/%Y %H:%M",
+                  "%m/%d/%y %H:%M",
+                  "%Y-%m-%d %H:%M:%OS",
+                  "%Y-%m-%d %H:%M",
+                  "%Y-%m-%d")
+  train$time <- as.POSIXlt(train$time, tryFormats = tryFormats)
 
   # pred read and preprocessing
   if (!is.null(pred_path)) {
@@ -66,7 +76,7 @@ towt_baseline <- function(train_path = NULL,
    else(pred <- pred_Data)
    pred <- towt_time_var(pred)
    pred <- clean_Temp(pred)
-   pred$time <- as.POSIXlt(pred$time)
+   pred$time <- as.POSIXlt(pred$time, tryFormats = tryFormats)
 
   #else{pred <- train}
   doTemperatureModel = T
