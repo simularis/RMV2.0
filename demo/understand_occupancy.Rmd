@@ -1,0 +1,398 @@
+---
+title: "Occupancy detection in RMV2.0 TOWT model"
+output: html_notebook
+---
+
+In this notebook, we try to visualize the automatic occupancy detection
+algorithm used in the RMV2.0 time-of-week temperature (TOWT) model. This
+article does not promote use of the algorithm for all cases. You should
+determine whether it is appropriate for your building and usage history.
+
+# Intro
+
+The occupancy detection is done by `findOccUnocc()`. Comments in the code
+explain the proccess:
+
+<blockquote>
+Define 'occupied' and 'unoccupied' based on a regression
+of load on outdoor temperature: times of week that the regression usually
+underpredicts the load will be called 'occupied', the rest are 'unoccupied'
+This is not foolproof but usually works well.
+</blockquote>
+<blockquote>
+If the regression underpredicts the load more than 65% of the time
+then assume it's an occupied period.
+</blockquote>
+
+Some details are important to clarify:
+
+* These regression fit used here is thrown away after occupancy detection. It
+  is not related to the baseline model we eventually get.
+* We use a two-changepoint model to fit the 8,760-hour data against temperature,
+  and no additional variables. 
+* _Underpredict_ means residual > 0, where residual = data - regression prediction.
+* _65% of the time_: At this point, we group data points by time of week, so
+  there are 7*24 = 168 groups. For each group, we then calculate the number of
+  data points (1 per week, usually 52 total) and of those, the number of data
+  points where the regression underpredicts. If the ratio is greater than 65%
+  (an arbitrary threshold), we set this time of week as "occupied".
+
+Here is the call stack:
+
+* `train_model` (called at <tt>server.R#298</tt>, defined at <tt>utils.R#215</tt>)
+* `towt_baseline` (called at <tt>utils.R#243</tt>, defined at
+  <tt>towt_baseline.R#42</tt>)
+* `makeBaseline` (called at <tt>towt_baseline.R#74</tt>, defined at
+  <tt>towt_baseline.R#433</tt>)
+* `fitLBNLregress` (called at <tt>towt_baseline.R#491</tt>, defined at
+  <tt>towt_baseline.R#224</tt>)
+* `findOccUnocc` (called at <tt>towt_baseline.R#296</tt>, defined at
+  <tt>towt_baseline.R#186</tt>)
+
+# Some development work
+
+Can we recover enough data to show the process, from a saved project file? If
+not, at what point in the code do we need to store some more data?
+
+```{r}
+library(dplyr)
+library(glue)
+library(RMV2.0)
+```
+
+```{r}
+# The 'project' file saved when you used the RMV2.0 add-in.
+rds_file <- "C:/RMV2.0 Workshop/something/Project_02.19.rds"
+Project <- readRDS(rds_file)
+i = 1
+```
+
+What next? Here, we recreate the function call to `towt_baseline`.
+
+```{r}
+
+pre_Data_i <- Project$Data_pre[[i]]
+timescaleDays <- Project$model_obj_list$models_list[[i]]$towt_model$timescaleDays
+intervalMinutes <- Project$Data_pre_summary[1,6]
+fahrenheit <- Project$fahrenheit
+
+res_baseline <- towt_baseline(train_Data = pre_Data_i,
+                              pred_Data = pre_Data_i,
+                              timescaleDays = timescaleDays,
+                              intervalMinutes = intervalMinutes,
+                              fahrenheit = fahrenheit,
+                              )
+```
+
+Now, to illustrate some of the data structures used in the next step ...
+
+```{r}
+train <- Project$model_obj_list$models_list[[i]]$train
+train
+```
+
+```{r}
+train$time <- as.POSIXlt(train$time, format="%m/%d/%y %H:%M")
+head(train$time)
+```
+
+```{r}
+pred <- Project$model_obj_list$models_list[[i]]$pred
+pred
+```
+
+```{r}
+pred$time <- as.POSIXlt(pred$time, format="%m/%d/%y %H:%M")
+head(pred$time)
+```
+
+What next? Here, we recreate the function call to `makeBaseline`. The function loops
+over a list of timestamps spaced by timescaleDays (the hyperparameter set by the user
+in the GUI, from 15 to 90 days). At each step, it sets up weights centered at the
+timestamp and calls `fitLBNLregress` to create a mini-regression. It then bundles all
+these regressions together.
+
+```{r}
+verbosity=5
+towt_model <- makeBaseline(train$time,
+                             train$eload,
+                             train$Temp,
+                             pred$time,
+                             pred$Temp,
+                             intervalMinutes=intervalMinutes,
+                             timescaleDays=timescaleDays,
+                             fahrenheit=fahrenheit,
+                             verbose=verbosity)
+
+```
+
+What next? Here, we recreate the function call to `fitLBNLregress`.
+
+```{r}
+dataTime <- train$time
+dataLoad <- train$eload
+dataTemp <- train$Temp
+predTime <- pred$time
+predTemp <- pred$Temp
+
+tempKnots = (c(40, 55, 65, 80, 90)-32)*5/9
+doTemperatureModel<-T
+verbose<-5
+
+npoints = length(dataLoad)
+t0 = min(dataTime,na.rm=T)
+t1 = max(dataTime,na.rm=T)
+deltaT = as.numeric(difftime(t1,t0,units="days"))
+nsegments = max(1,ceiling(deltaT/timescaleDays))
+segmentwidth = (npoints-1)/nsegments
+pointlist = floor(sort(npoints-segmentwidth*(0:nsegments))+0.001)
+nModelRuns = max(1,length(pointlist))
+
+#for (irun in 1:nModelRuns)
+irun <- 1
+tcenter = dataTime[pointlist[irun]]
+tDiff = as.numeric(difftime(tcenter,dataTime,units="days"))
+tDiffPred = as.numeric(difftime(tcenter,predTime,units="days"))
+weightvec = timescaleDays^2/(timescaleDays^2 + tDiff^2)
+
+regOut = fitLBNLregress(dataTime, dataLoad, dataTemp, predTime, predTemp,
+			tempKnots = tempKnots, weightvec=weightvec,
+			intervalMinutes=intervalMinutes,fahrenheit=fahrenheit,
+			doTemperatureModel=doTemperatureModel,verbose=verbose)
+```
+
+What next? Here, we recreate the function call to `findOccUnocc` (from the first step
+inside `fitLBNLregress`). Note:
+
+* This is where we first label each timestamp with an integer `intervalOfWeek` using the weekday, hour, and minute parts of the timestamp data.
+* The `intervalOfWeek` increments by 1 every `intervalMinutes` (in this project, every 60 minutes).
+* Eg., Sunday, 2006-01-01T00:00 has (wday, hour, minute) = (0,0,0). 00:00 through 00:59 would all be labeled `intervalOfWeek` = 1.
+* Eg., Sunday, 2006-01-01T01:00 has (wday, hour, minute) = (0,1,0), which is mapped to intervalOfWeek = 2.
+
+```{r}
+timeVec <- dataTime
+loadVec <- dataLoad
+tempVec <- dataTemp
+#predTime
+#predTemp
+#tempKnots
+#weightvec
+#intervalMinutes
+#fahrenheit
+#doTemperatureModel
+#verbose
+
+minuteOfWeek = 24*60*timeVec$wday+60*timeVec$hour + timeVec$min
+intervalOfWeek = 1+floor(minuteOfWeek/intervalMinutes)
+
+# If we have temperature data then fit the time-of-week-and-temperature model
+
+if (fahrenheit) {
+	# temperature vector is already in fahrenheit
+	tempVecF = tempVec
+	tempVec = (tempVec-32)*5/9
+	tempVecPredF = predTemp
+	tempVecPred = (predTemp-32)*5/9
+} else {
+	tempVecF = (tempVec*9/5)+32
+	tempVecPredF = (predTemp*9/5)+32
+	tempVecPred = predTemp
+}
+
+# findOccUnocc requires Fahrenheit temperatures; everywhere else we can use either
+#  Celsius or Fahrenheit, as long as temperature knots are set appropriately
+#
+# base occupied/unoccupied decision only on cases where we have load data:
+okload = !is.na(loadVec)
+occInfo = findOccUnocc(intervalOfWeek[okload],loadVec[okload],tempVecF[okload])
+head(occInfo,40)
+tail(occInfo,20)
+```
+
+What next? Here, we demonstrate the occupancy detection algorithm within `findOccUnocc`. Note:
+
+* `uTOW` = unique time-of-week. If `intervalMinutes`=60, then there are up to 168 such
+numbers. We do not need to sort them, which is unnecessary.
+* 
+
+```{r}
+intervalOfWeek2 <- intervalOfWeek[okload]
+loadVec2 <- loadVec[okload]
+TempF <- tempVecF[okload]
+#intervalMinutes
+#verbose
+
+# Figure out which times of week a building is in one of two modes
+#  (called 'occupied' or 'unoccupied')
+
+uTOW = unique(intervalOfWeek2)
+nTOW = length(uTOW)
+
+# Define 'occupied' and 'unoccupied' based on a regression
+# of load on outdoor temperature: times of week that the regression usually
+# underpredicts the load will be called 'occupied', the rest are 'unoccupied'
+# This is not foolproof but usually works well.
+#
+TempF50 = TempF-50
+TempF50[TempF > 50] = 0
+TempF65 = TempF-65
+TempF65[TempF < 65] = 0
+
+if (verbose > 4) {
+	cat("Fitting temperature regression...\n")
+}
+amod = lm(loadVec2 ~ TempF50+TempF65,na.action=na.exclude)
+
+okocc = rep(0,nTOW)
+cat("Detecting occupancy ...\n")
+for (itow in 1:nTOW) {
+	okTOW = intervalOfWeek2==uTOW[itow]
+	# if the regression underpredicts the load more than 65% of the time
+	# then assume it's an occupied period
+	if ( sum(residuals(amod)[okTOW]>0,na.rm=T) > 0.65*sum(okTOW) ) {
+		okocc[itow]=1
+	}
+  cat(glue('[{format(t,width=3)}] {format(nunder,width=2)}/{format(ntotal,width=2)} -> {occ}',
+           t=uTOW[itow],
+           nunder=sum(residuals(amod)[okTOW]>0,na.rm=T),
+           ntotal=sum(okTOW),
+           occ=okocc[itow]
+           ),'\n')
+
+}
+occInfo = cbind(uTOW,okocc)
+```
+
+# Visualization
+Here are a bunch of ways to visualize the occupancy detection algorithm. The best one
+is all the way at the bottom, which is mostly scripted in Javascript with Charts.js.
+
+## Static plot using ggplot2
+
+```{r}
+library(ggplot2)
+tow <- 40
+okTOW = intervalOfWeek2==tow
+
+ggplot() +
+  geom_point(data=data.frame(x=TempF,y=loadVec2), aes(x, y), color='gray') +
+  geom_point(data=data.frame(x=TempF[okTOW],y=loadVec2[okTOW]), aes(x, y), color='blue') +
+  geom_line(data=data.frame(x=TempF,y=predict(amod)), aes(x, y)) +
+  xlab("Temperature (°F)") + #"\xB0"
+  ylab("Load (kW)")
+
+```
+
+
+## A bunch of static plots
+
+```{r}
+# To repeat the same data in every panel, simply construct a data frame
+# that does not contain the faceting variable.
+mydata=data.frame(x=TempF,y=loadVec2,ypred=predict(amod),tow=intervalOfWeek2)
+mydata[mydata$tow<10,]
+```
+
+```{r}
+ggplot(mydata[mydata$tow<10,], aes(x, y)) +
+  geom_point(data = transform(mydata, tow = NULL), colour = "grey85") +
+  geom_point() +
+  facet_wrap(vars(tow))
+```
+
+## Animated plot using plotly
+
+```{r}
+library(plotly)
+
+mydata %>%
+  plot_ly(
+    x = ~x,
+    y = ~y,
+    frame = ~tow,
+    type = 'scatter',
+    mode = 'markers',
+    showlegend = F
+  )
+```
+## Using plotly to animate ggplot2 style
+
+```{r}
+#  geom_point(aes(x, y), color='gray') +
+#  geom_line(aes(x, ypred)) +
+
+p <- ggplot(mydata) +
+  geom_point(aes(x, y, frame=tow), color='blue') +
+  xlab("Temperature (°F)") + #"\xB0"
+  ylab("Load (kW)")
+
+fig <- ggplotly(p) %>%
+  animation_opts(
+    frame=500, easing='linear', redraw = F
+  )
+fig
+```
+
+## Plotly animation WITH full point cloud in the background
+This suffers from slow speed (heavy on the CPU usage).
+
+```{r}
+mydata %>%
+  plot_ly(x=~x,mode='none') %>%
+  layout(xaxis=list(title=list(text='Temperature (°F)')),
+         yaxis=list(title=list(text='Load (kW)'))) %>%
+  add_trace(y=~y,name='loads', type='scatter', mode='markers',
+            showlegend=F, marker=list(color='grey'), text = 'none') %>%
+  add_lines(y=~ypred,name='fit',
+            showlegend=F, line=list(color = 'black')) %>%
+  add_trace(
+    y = ~y,
+    frame = ~tow,
+    type = 'scatter',
+    mode = 'markers',
+    showlegend = F,
+    marker = list(color = 'blue')
+  ) %>%
+  animation_opts(
+    frame=500, easing='linear', redraw=F
+  )
+```
+
+## Customized widget with Chart.js
+
+Next, I've created a javascript-based charting widget because this is more
+interactive than an animation, and works better because it doesn't
+animate the point cloud in the background. The widget does not yet interact with R,
+so I'm just going to show how to export some data to a file that I have manually pasted
+into the widget. Here are some future features:
+
+* Generate the widget from the R markdown notebook automatically.
+* Add a slider for the detection threshold (now at 65%).
+* Caution: the time-of-week numbers here may not be the same as in the R script.
+
+Here is how I export the data to the widget.
+
+```{r}
+# Convert to JSON for Chart.js
+dataByTOW=uTOW %>% purrr::map(~ mydata[mydata$tow==.x,])
+dataByTOWjson = jsonlite::toJSON(dataByTOW, pretty=F)
+#fitLine = unique(mydata[with(mydata,order(x)),c('x','ypred')])
+fitLine = data.frame(x=TempF,y=predict(amod)) %>% unique() %>% arrange(x)
+fitLinejson = jsonlite::toJSON(fitLine, pretty=F)
+sink('datafile.js')
+cat(glue('const dataByTOW = {dataByTOWjson};
+const fitLine = {fitLinejson};'))
+sink()
+#mydata %>% mutate(x=x,y=ypred)
+```
+
+Here is the widget. Try pointing the mouse over the time-of-week grid:
+
+* Vertical: from Sunday through Saturday
+* Horizontal: from midnight to midnight
+* Collapsed on: week of the year
+
+<iframe width="900" height="1200" src="./mychart3.html"></iframe>
+
+That is all. Thank you for reading.
+Find more from [my fork of RMV2.0](https://github.com/simularis/RMV2.0/tree/dev/demo)
