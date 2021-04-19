@@ -340,6 +340,14 @@ function Utils_parseISODate(str) {
   
   <div id="mydiv">
   </div>
+  <br>
+  <div style="text-align:center">
+    <label for="volume">Detection threshold</label>
+    <input type="range" id="volume" name="volume"
+           min="0" max="1" value="0.65" step="0.05">
+    <span id="detectionThresholdSpan" style="display: inline-block;
+      width: 3em;">65%</span>
+  </div>
   
   <div data-v-365c20ab="" class="chart-editor" style="display: block; position: relative">
     <canvas id="residualsChart" width="768" height="384" style="display: block; box-sizing: border-box; height: 384px; width: 768px;"></canvas>
@@ -618,6 +626,8 @@ const data0 = [
   {x: 81.18484225, y: 80.35236626, r: 1}
 ];
 */
+var detectionThreshold = 0.65;
+
 function rescaleDataSet(i,el) {
   if (!locked) {
     myChart.data.datasets[0].data = dataByTOW[i].map((p) => ({x:p.x, y:p.y}));
@@ -631,7 +641,7 @@ function rescaleDataSet(i,el) {
     let n_weeks = residuals.length;
     let n_underpredict = residuals.filter((p) => p.y > 0).length;
     let fraction_under = n_underpredict / n_weeks;
-    let is_occupied = (n_underpredict > 0.65 * n_weeks);
+    let is_occupied = (n_underpredict > detectionThreshold * n_weeks);
     
     document.getElementById("residualsStats").innerHTML=(
       `<table class="mytooltip">
@@ -676,10 +686,30 @@ for (let i = 0; i < 168; i += 1) {
   let residuals = dataByTOW[i].map((p,i) => ({x:i, y:p.y-p.ypred}));
   let n_weeks = residuals.length;
   let n_underpredict = residuals.filter((p) => p.y > 0).length;
-  let is_occupied = (n_underpredict > 0.65 * n_weeks);
+  let is_occupied = (n_underpredict > detectionThreshold * n_weeks);
   //console.log(i, n_weeks, n_underpredict, is_occupied);
   if (is_occupied) el.classList.add("occupied");
 }
+
+document.getElementById("volume").addEventListener('input', function(e) {
+  detectionThreshold = e.target.value;
+  document.getElementById("detectionThresholdSpan").innerText=
+    (100*detectionThreshold).toFixed()+"%";
+
+  for (let i = 0; i < 168; i += 1) {
+    let el = document.getElementById("tow" + i);
+    // Determine if the i^th TOW is occupied.
+    let residuals = dataByTOW[i].map((p,i) => ({x:i, y:p.y-p.ypred}));
+    let n_weeks = residuals.length;
+    let n_underpredict = residuals.filter((p) => p.y > 0).length;
+    let is_occupied = (n_underpredict > detectionThreshold * n_weeks);
+    if (is_occupied) {
+      el.classList.add("occupied");
+    } else {
+      el.classList.remove("occupied");
+    }
+  }
+});
 
 </script>
 
