@@ -230,7 +230,7 @@ train_model <- function(var_out,
     {
     for (i in 1:length(files_names)){
        name_i <- files_names[i]
-       incProgress(1/length(files_names),
+       incProgress(1/(length(files_names)+1),
                    detail = paste("Training a model for",
                                   Data_pre_summary[i,1]))
        res_baseline <- as.character(Data_pre_summary[i,1])
@@ -301,6 +301,9 @@ train_model <- function(var_out,
          failures <- c(failures,i)
        }
        else{res_list[[name_i]] <- res_baseline}
+
+       incProgress(1/(length(files_names)+1),
+                   detail = paste("Done training models for",length(files_names), "files"))
     }
   })
   return(list(res_list = res_list, failures = failures))
