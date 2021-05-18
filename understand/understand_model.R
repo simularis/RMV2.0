@@ -167,6 +167,42 @@ print(regOut$bmod)
 # * Also, model improvement suggestion: choose tempKnots via k-means cluster analysis.
 
 
+
+## New stuff
+# Dump all the regression coefficients to a CSV file.
+
+#library(plyr)
+library(stringr)
+rol=Project[["model_obj_list"]][["models_list"]][["Data_pre_2_2.csv"]][["towt_model"]][["regOutList"]]
+mylist=list()
+for (irun in 1:length(rol)) {
+  cat(paste(rep("=",80),collapse=""),"\n")
+  cat(paste("Model run ",irun,"\n"))
+  cat(paste(rep("=",80),collapse=""),"\n")
+  print(summary.lm(rol[[irun]]$amod))
+
+
+  x=data.frame(t(rol[[irun]]$amod$coefficients))
+  x["_occ"]="occ"
+  y=data.frame(t(rol[[irun]]$bmod$coefficients))
+  y["_occ"]="unocc"
+  x["_irun"]=irun
+  y["_irun"]=irun
+  #newcoeffs=merge(x,y,all=T)
+  mylist=rbind(mylist,list(x),list(y))
+
+
+}
+newcoeffs=Reduce(function(x,y){merge(x,y,all=T)},mylist)
+mycoeffs=newcoeffs[order(newcoeffs$`_irun`,newcoeffs$`_occ`),str_sort(names(newcoeffs),numeric=T)]
+View(mycoeffs)
+write.table(mycoeffs,file="mycoeffsfile.csv",sep=",",row.names=F)
+
+
+
+
+
+
 ## Clean up: remove global variables from workspace and detach scope
 ## Comment out these lines if you want to inspect further
 rm(rds_file, isSavings, projectType, i, df, df2, tCenters, nModelRuns, irun, regOut)

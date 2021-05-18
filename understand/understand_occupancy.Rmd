@@ -225,7 +225,10 @@ TempF <- tempVecF[okload]
 # Figure out which times of week a building is in one of two modes
 #  (called 'occupied' or 'unoccupied')
 
-uTOW = unique(intervalOfWeek2)
+# RMV2.0 does not sort this vector. Although that doesn't matter,
+# I prefer to have it sorted now.
+#uTOW = unique(intervalOfWeek2)
+uTOW = sort(unique(intervalOfWeek2))
 nTOW = length(uTOW)
 
 # Define 'occupied' and 'unoccupied' based on a regression
@@ -289,7 +292,7 @@ ggplot() +
 ```{r}
 # To repeat the same data in every panel, simply construct a data frame
 # that does not contain the faceting variable.
-mydata=data.frame(x=TempF,y=loadVec2,ypred=predict(amod),tow=intervalOfWeek2)
+mydata=data.frame(x=TempF,y=loadVec2,ypred=predict(amod),tow=intervalOfWeek2,timeVec=timeVec)
 mydata[mydata$tow<10,]
 ```
 
@@ -375,15 +378,23 @@ Here is how I export the data to the widget.
 ```{r}
 # Convert to JSON for Chart.js
 dataByTOW=uTOW %>% purrr::map(~ mydata[mydata$tow==.x,])
-dataByTOWjson = jsonlite::toJSON(dataByTOW, pretty=F)
+
 #fitLine = unique(mydata[with(mydata,order(x)),c('x','ypred')])
 fitLine = data.frame(x=TempF,y=predict(amod)) %>% unique() %>% arrange(x)
+
+# Here's how to save the data directly as a block of javascript code.
+# This is a temporary hack to pass the data to a widget that is just hand-coded HTML.
+dataByTOWjson = jsonlite::toJSON(dataByTOW, pretty=F)
 fitLinejson = jsonlite::toJSON(fitLine, pretty=F)
 sink('datafile.js')
 cat(glue('const dataByTOW = {dataByTOWjson};
 const fitLine = {fitLinejson};'))
 sink()
 #mydata %>% mutate(x=x,y=ypred)
+
+# Here's how to store the data in native R objects.
+# This is for testing the next version of the widget, using htmlwidgets package.
+saveRDS(list(dataByTOW=dataByTOW, fitLine=fitLine, mydata=mydata), file="mydatafile.RDS")
 ```
 
 Here is the widget. Try pointing the mouse over the time-of-week grid:
@@ -392,7 +403,18 @@ Here is the widget. Try pointing the mouse over the time-of-week grid:
 * Horizontal: from midnight to midnight
 * Collapsed on: week of the year
 
-<iframe width="900" height="1200" src="./mychart3.html"></iframe>
+Here is the old code to insert an iframe. It should not actually render one.
+
+```
+iframe width="900" height="1200" src="./mychart3.html" /iframe
+```
+
+```{r}
+library(mywidget)
+#occupancy_widget("Hello, globals!", dataByTOWjson, fitLinejson, 'json')
+occupancy_widget("hello, solar system!",dataByTOW, fitLine, 'r', width='auto', height='auto')
+```
+
 
 That is all. Thank you for reading.
 Find more from [my fork of RMV2.0](https://github.com/simularis/RMV2.0/tree/dev/demo)
