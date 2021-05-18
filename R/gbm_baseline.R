@@ -60,7 +60,8 @@ gbm_baseline <- function(train_path = NULL,
                          depth = c(3:7),
                          lr = c(0.05,0.1),
                          subsample=c(0.5),
-                         verbose = FALSE){
+                         verbose = FALSE,
+                         cb.progress = TRUE){
   # train read and preprocess
   if (!is.null(train_path)){
     train <- read.csv(file = train_path, header=T,
@@ -74,6 +75,15 @@ gbm_baseline <- function(train_path = NULL,
   }
   train <- clean_Temp(train)
   train <- clean_eload(train)
+
+  if (!is.null(cb.progress)){
+    a_progress = shiny::Progress$new(session=getDefaultReactiveDomain(),
+                                     min=0, max=2)
+    on.exit(a_progress$close())
+    a_progress$set(value=0,
+                   message = 'GBM baseline running...',
+                   detail = "Step 1: Tuning")
+  }
   if (verbose){
     cat('"================================="\n')
     cat('"Model Tuning"\n')
@@ -91,6 +101,11 @@ gbm_baseline <- function(train_path = NULL,
 
   tuned_parameters <- tune_results$tuned_parameters
   gbm_cv_results <- tune_results$grid_results
+
+  if (!is.null(cb.progress)){
+    a_progress$set(value=1,
+                   detail = "Step 2: Training")
+  }
 
   # Final gbm model
   train_output <- train$eload
@@ -110,6 +125,11 @@ gbm_baseline <- function(train_path = NULL,
                                 nthread = 1,
                                 save_period = NULL)
 
+  if (!is.null(cb.progress)){
+    a_progress$set(value=2,
+                   detail = "Check goodness of fit")
+  }
+
   # Fitting:
   y_fit <- predict(gbm_model, as.matrix(train_input))
   fit_residuals <- train_output - y_fit
@@ -121,7 +141,18 @@ gbm_baseline <- function(train_path = NULL,
   goodness_of_fit$fit_NMBE <- 100*mean((fit_residuals))/mean(train_output)
 
   res <- NULL
+  # The gbm_model element in this list is never used elsewhere in RMV2.0.
   res$gbm_model <- gbm_model
+  # If you just want to save things:
+  # "Use xgb.save.raw to save the XGBoost model as a sequence (vector) of raw bytes"
+  # This allows the model to be reconstructed from the session save file.
+  print(gbm_model)
+  xgboost::xgb.save(gbm_model, "C:/RMV2.0 Workshop/deteleme/xgb.model")
+  xgboost::xgb.dump(gbm_model, "C:/RMV2.0 Workshop/deteleme/model.dump", with_stats=TRUE)
+  res$gbm_model_raw <- xgboost::xgb.save.raw(gbm_model)
+  res$gbm_model_serialized <- xgboost::xgb.serialize(gbm_model)
+  res$variables <- variables
+
   res$train <- train
   res$fitting <- y_fit
   res$goodness_of_fit <- goodness_of_fit
@@ -196,9 +227,11 @@ gbm_tune <- function(Data,
                      depth,
                      lr,
                      subsample){
+  cat(paste("Make cluster with ",ncores,"cores\n"))
   cl <- parallel::makeCluster(ncores)
   output <- Data$eload
   input <- Data[,variables]
+  cat(paste("Create folds, k = ",k_folds,"\n"))
   if (cv_blocks=="days"){
     list_train <- k_dblocks_cv(Data,k_folds)
   }
@@ -218,6 +251,11 @@ gbm_tune <- function(Data,
   names(tab_grid_res) <- c("iter","depth","lr","subsample",
                            "R2","RMSE","CVRMSE",
                            "R2_sd","RMSE_sd","CVRMSE_sd")
+  ## Basic progress bar in console
+  pb <- progress::progress_bar$new(total = n_grid, clear=F,
+                         format="K-folds tuning (:spin) [:bar] :current / :total (:percent) :eta")
+  pb$update(ratio = 0)
+
   for (i in 1:n_grid){
     nrounds_i <- gbm_grid$nrounds[i]
     max_depth_i <- gbm_grid$max_depth[i]
@@ -243,6 +281,7 @@ gbm_tune <- function(Data,
     tab_grid_res$R2_sd[i] <- sd(tab_cv_res$R2)
     tab_grid_res$RMSE_sd[i] <- sd(tab_cv_res$RMSE)
     tab_grid_res$CVRMSE_sd[i] <- sd(tab_cv_res$CVRMSE)
+    pb$tick()
   }
   idx_best_param <- which(tab_grid_res$RMSE == min(tab_grid_res$RMSE))
   best_param <- list(best_iter = tab_grid_res$iter[idx_best_param],

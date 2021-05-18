@@ -192,7 +192,9 @@ piecewiseVariables <- function(Tvec,Tknot) {
 
 
 ##
-
+#' Need to export this function for notebook to deconstruct occupancy detection
+#'
+#' @export
 findOccUnocc<- function(intervalOfWeek,loadVec,TempF,intervalMinutes=15,verbose=1) {
 	if (verbose > 4) { print("starting findOccUnocc()") }
 	# Figure out which times of week a building is in one of two modes
@@ -230,7 +232,9 @@ findOccUnocc<- function(intervalOfWeek,loadVec,TempF,intervalMinutes=15,verbose=
 }
 
 ###
-
+#' Need to export this function for notebook to deconstruct occupancy detection
+#'
+#' @export
 fitLBNLregress <- function(timeVec,loadVec,tempVec,
 	predTime,predTemp,tempKnots,weightvec=NULL,
 	intervalMinutes=15, fahrenheit = F,
@@ -439,7 +443,9 @@ fitLBNLregress <- function(timeVec,loadVec,tempVec,
 }
 
 ###
-
+#' Need to export this function for notebook to deconstruct occupancy detection
+#'
+#' @export
 makeBaseline <- function(dataTime, dataLoad, dataTemp, predTime, predTemp,
 	intervalMinutes=15, timescaleDays = 14,fahrenheit = F,
 	doTemperatureModel=T,verbose=1) {
